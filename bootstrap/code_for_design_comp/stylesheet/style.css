@@ -19,12 +19,38 @@ p {
 
 }
 
+.section_title {
+  /* フォントサイズ36px */
+  font-size: 36px;
+
+  /* フォントの太さ600 標準は400です */
+  font-weight: 600;
+}
+
+/* section_titleに擬似要素を追加 */
+.section_title::after {
+
+  /* 疑似要素はデフォルトでインライン要素のためブロック要素に変更 */
+  display: block;
+
+  /* サブタイトル文字の大きさや余白を設定 */
+  font-size: 14px;
+  font-weight: 400;
+  padding: 16px 0 16px;
+
+  /* 下線の幅を100pに設定 */
+  width: 100px;
+
+  /* 下線を直線・1px・黒色に設定 */
+  border-bottom: solid 1px #000000;
+}
+
 
 
 /* ----------------------------------------------- ナビゲーションバー */
 /* ----------------------------------------------- ナビゲーションメニュー */
 .navbar_brand_logo {
-  
+
   /* サイズを32pxの正方形へ変更 */
   width: 32px;
   height: 32px;
@@ -36,6 +62,7 @@ p {
   margin-right: 15px;
 
 }
+
 /* これ以前のコードは編集しないため省略しています */
 
 /* カンマで区切ると複数のクラスに適用可能 */
@@ -84,7 +111,7 @@ p {
 
 /* ----------------------------------------------- カールセル */
 .my_carousel_caption {
-  
+
   /* フォントサイズ52px */
   font-size: 52px;
 
@@ -133,22 +160,43 @@ p {
   /* 高さはcarousel-itemに揃える */
   height: 32rem;
 }
-Copy
-
-
-
-
 
 /* ----------------------------------------------- アバウト */
+/* aboutクラスのあとに"私たちについて"の文字を追加  */
+.about::after {
+  content: "私たちについて";
+}
 
+.about_us_bg {
+  background-color: #FFE6A5;
+}
 
 
 
 
 /* ----------------------------------------------- ギャラリー */
+.gallery::after {
+  content: "ギャラリー";
+  margin: 0 auto 0;
+}
 
+/* ----------------------------------------------- メニュー */
+.menu::after {
+  content: "メニュー";
+  margin: 0 auto 0;
+}
 
+.menu_title {
+  font-size: 18px;
+  font-weight: 600;
+  font-style: normal;
+}
 
+.menu_price {
+  font-size: 20px;
+  font-weight: 400;
+  font-family: 'Lora', serif;
+}
 
 
 /* ----------------------------------------------- メニュー */
