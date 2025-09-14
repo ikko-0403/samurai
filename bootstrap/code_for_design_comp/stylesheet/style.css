@@ -79,11 +79,61 @@ p {
   display: none;
 }
 
-/* これ以後のコードは編集しないため省略しています */
 
 
 
 /* ----------------------------------------------- カールセル */
+.my_carousel_caption {
+  
+  /* フォントサイズ52px */
+  font-size: 52px;
+
+  /* 上下に余白追加 */
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+
+  /* フォント色は白色 */
+  color: #fff;
+
+  /* テキスト中央揃え */
+  text-align: center;
+  font-family: 'Lora', serif;
+  line-height: 1.5em;
+}
+
+/* 疑似要素でアイコンを配置。前に配置しています */
+.my_carousel_caption::before {
+  content: url(../img/logoSymbol_White.png);
+  display: block;
+}
+
+/* スマートフォン画面幅（画面幅が最大375pxまで）の場合、以下のスタイルを適用。 */
+@media screen and (max-width:375px) {
+  .my_carousel_caption {
+
+    /* フォントサイズを27pxにする */
+    font-size: 27px;
+  }
+}
+
+/* carousel-itemの高さを32remに指定 */
+.carousel-item {
+  height: 32rem;
+}
+
+/*carousel-item直下の子要素imgタグに設定 */
+.carousel-item>img {
+
+  /* 絶対位置を指定 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+
+  /* 高さはcarousel-itemに揃える */
+  height: 32rem;
+}
+Copy
 
 
 
