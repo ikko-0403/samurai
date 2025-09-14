@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>JavaScript基礎編</title>
+</head>
+
+<body>
+    <h1>ユーザー名を表示します。</h1>
+    <div id="output"></div>
+
+    <script>
+        // Session Storageに保存したユーザー名を取得
+        const userName = sessionStorage.getItem('userName');
+        document.getElementById('output').textContent = 'ユーザー名：' + userName;
+    </script>
+</body>
+</html>

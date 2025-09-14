@@ -1,0 +1,47 @@
+/* ルートと本文の基本指定 */
+:root {
+  font-size: 20px; /* ルート要素=20px */
+}
+
+body {
+  font-family: "Arial", "Meiryo", sans-serif; /* 本文フォント */
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  text-align: center; /* 全テキスト中央寄せ */
+  line-height: 1.6;
+}
+
+/* 色クラス */
+.blue {
+  color: skyblue; /* スカイブルーはキーワード指定 */
+}
+
+.pink {
+  color: rgb(255, 192, 203); /* ピンクはRGB指定 */
+}
+
+/* h1 の装飾 */
+h1 {
+  font-family: "Josefin Sans", sans-serif; /* Googleフォント＋総称 */
+  font-size: 2rem;                         /* ルートの2倍 */
+  letter-spacing: 1.2em;                   /* 文字間=文字サイズの1.2倍 */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.25); /* 影 */
+  border-bottom: 3px solid rgb(115, 115, 114); /* 下線3px */
+}
+
+/* h2 見出し */
+h2 {
+  margin: 18px 0 8px;
+}
+
+/* p の基本設定 */
+p {
+  margin: 0 0 14px;
+  font-weight: normal; /* 通常は太字にしない */
+}
+
+/* 子孫要素を利用して basic 内の p だけ太字 */
+#basic p {
+  font-weight: bold;
+}
