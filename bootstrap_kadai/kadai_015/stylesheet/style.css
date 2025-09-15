@@ -267,7 +267,7 @@ p {
   content: "シェフ";
 }
 
-#chef {
+.chef_bg {
   background-color: #fdf5e6;
 }
 
