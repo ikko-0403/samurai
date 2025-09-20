@@ -1,0 +1,22 @@
+ikkoikko@ikkonoMacBook-Pro kadai_github % mkdir git_challenge
+ikkoikko@ikkonoMacBook-Pro kadai_github % touch hello_world.txt
+ikkoikko@ikkonoMacBook-Pro kadai_github % git add .
+ikkoikko@ikkonoMacBook-Pro kadai_github % git init
+ikkoikko@ikkonoMacBook-Pro kadai_github % echo "Hello,world!" >> hello_world.txt
+dquote> 
+ikkoikko@ikkonoMacBook-Pro kadai_github % echo 'Hello,world' >> hello_world.txt
+ikkoikko@ikkonoMacBook-Pro kadai_github % git add .
+ikkoikko@ikkonoMacBook-Pro kadai_github % git commit -m "hello_worldを追加"    
+[master (root-commit) 0ab6457] hello_worldを追加
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello_world.txt
+ikkoikko@ikkonoMacBook-Pro kadai_github % echo 'こんにちは、世界！' >> hello_world.txt
+ikkoikko@ikkonoMacBook-Pro kadai_github % git add .
+ikkoikko@ikkonoMacBook-Pro kadai_github % git commit -m "日本語訳を追加"              
+[master 1f11877] 日本語訳を追加
+ 1 file changed, 1 insertion(+)
+ikkoikko@ikkonoMacBook-Pro kadai_github % git log --oneline
+
+1f11877 (HEAD -> master) 日本語訳を追加
+0ab6457 hello_worldを追加
+ikkoikko@ikkonoMacBook-Pro kadai_github % 
