@@ -1,0 +1,33 @@
+ikkoikko@ikkonoMacBook-Pro kadai_github % mkdir git_challenge
+kkoikko@ikkonoMacBook-Pro kadai_github % cd git_challenge
+ikkoikko@ikkonoMacBook-Pro git_challenge % git init
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint:   git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint:   git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+Initialized empty Git repository in /Users/ikkoikko/Desktop/samurai-1/kadai_github/git_challenge/.git/
+ikkoikko@ikkonoMacBook-Pro git_challenge % touch hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % echo 'Hello,world!' >> hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % git add hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % git commit -m "hello_worldを追加"           
+[master (root-commit) 15cf47e] hello_worldを追加
+ 1 file changed, 1 insertion(+)
+ create mode 100644 hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % echo 'こんにちは、世界！' >> hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % git add hello_world.txt
+ikkoikko@ikkonoMacBook-Pro git_challenge % git commit -m "日本語訳を追記"              
+[master cae2a6f] 日本語訳を追記
+ 1 file changed, 1 insertion(+)
+ ikkoikko@ikkonoMacBook-Pro git_challenge % git log --oneline                     
+
+cae2a6f (HEAD -> master) 日本語訳を追記
+15cf47e hello_worldを追加
+ikkoikko@ikkonoMacBook-Pro git_challenge % 
