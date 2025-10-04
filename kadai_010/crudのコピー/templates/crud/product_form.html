@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}新規作成{% endblock %}
+{% block content %}
+<h1>新規作成</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <br>
+    <a href="{% url 'list' %}">戻る</a>
+    {% bootstrap_button button_type="submit" content="登録" %}
+</form>
+{% endblock %}
