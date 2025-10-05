@@ -12,6 +12,7 @@ class Product(models.Model):
     price = models.PositiveIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     img = models.ImageField(blank=True, default='noImage.png')
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name

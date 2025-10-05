@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}商品詳細{% endblock %}
+
+{% block content %}
+<h1>{{ object.name }}</h1>
+
+<p><strong>価格:</strong> {{ object.price }} 円</p>
+<p><strong>カテゴリ:</strong> {{ object.category }}</p>
+
+{% if object.img %}
+    <p><strong>商品画像:</strong><br>
+    <img src="{{ object.img.url }}" alt="{{ object.name }}" style="max-width:200px;"></p>
+{% endif %}
+
+{% if object.description %}
+    <p><strong>商品詳細:</strong><br>
+    {{ object.description }}</p>
+{% endif %}
+
+<br>
+<a href="{% url 'list' %}">一覧に戻る</a>
+{% endblock %}
