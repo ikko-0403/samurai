@@ -27,6 +27,8 @@ urlpatterns = [
     path('crud/new/', views.ProductCreateView.as_view(), name="new"),
     path('crud/edit/<int:pk>', views.ProductUpdateView.as_view(), name="edit"),
     path('crud/delete/<int:pk>', views.ProductDeleteView.as_view(), name="delete"),
+    path('login/', views.LoginView.as_view(), name="login"),
+    path('logout/', views.LogoutView.as_view(), name="logout"),
 ]
 
 if settings.DEBUG:
