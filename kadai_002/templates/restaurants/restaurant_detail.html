@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ restaurant.name }} | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-5 mb-3">
+    {% if restaurant.image %}
+      <img src="{{ restaurant.image.url }}"
+           alt="{{ restaurant.name }}"
+           class="img-fluid rounded shadow-sm">
+    {% endif %}
+  </div>
+
+  <div class="col-md-7">
+    <h1 class="mb-2">{{ restaurant.name }}</h1>
+
+    {# ★ 平均評価＋ボタン（←ブロック内に移動！） #}
+    <p class="mb-2">
+      <strong>評価：</strong>
+      {% with avg_int=avg_rating|floatformat:0 %}
+        <span class="text-warning">
+          {% for _ in "12345" %}
+            {% if forloop.counter <= avg_int %}★{% else %}☆{% endif %}
+          {% endfor %}
+        </span>
+      {% endwith %}
+      <span class="ms-2">({{ avg_rating|floatformat:1 }} / 5, {{ review_count }}件)</span>
+    </p>
+
+    {% if user.is_authenticated %}
+      {% if my_review %}
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'reviews:review_edit' my_review.pk %}">自分のレビューを編集</a>
+        <a class="btn btn-sm btn-outline-danger" href="{% url 'reviews:review_delete' my_review.pk %}">削除</a>
+      {% else %}
+        <a class="btn btn-sm btn-primary" href="{% url 'reviews:review_create' restaurant.pk %}">レビューを書く</a>
+      {% endif %}
+    {% else %}
+      <a class="btn btn-sm btn-primary" href="{% url 'accounts:login' %}?next={{ request.path }}">ログインしてレビューを書く</a>
+    {% endif %}
+
+    <hr class="my-3">
+
+    <p class="mb-2">{{ restaurant.description }}</p>
+
+    <table class="table table-sm">
+      <tbody>
+        <tr>
+          <th style="width: 120px;">カテゴリ</th>
+          <td>{{ restaurant.category.name }}</td>
+        </tr>
+        <tr>
+          <th>会社</th>
+          <td>{{ restaurant.company.name }}</td>
+        </tr>
+        <tr>
+          <th>住所</th>
+          <td>{{ restaurant.address }}</td>
+        </tr>
+        <tr>
+          <th>営業時間</th>
+          <td>{{ restaurant.open_time }}〜{{ restaurant.close_time }}</td>
+        </tr>
+        <tr>
+          <th>定休日</th>
+          <td>{{ restaurant.holiday }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary btn-sm">
+      ← 一覧に戻る
+    </a>
+  </div>
+</div>
+
+<h3 class="h5 mt-4">最新のレビュー</h3>
+{% if recent_reviews %}
+  <ul class="list-unstyled">
+    {% for rv in recent_reviews %}
+      <li class="mb-3">
+        <div class="small text-muted">
+          {{ rv.user.name|default:rv.user.email }} / {{ rv.created_at|date:"Y-m-d" }}
+        </div>
+        <div class="text-warning">
+          {% for _ in "12345" %}
+            {% if forloop.counter <= rv.rating %}★{% else %}☆{% endif %}
+          {% endfor %}
+        </div>
+        {% if rv.title %}<strong>{{ rv.title }}</strong><br>{% endif %}
+        <div>{{ rv.comment|linebreaksbr }}</div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>まだレビューはありません。</p>
+{% endif %}
+{% endblock %}

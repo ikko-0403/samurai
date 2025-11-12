@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}マイページ | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+  <h2>MYPAGE</h2>
+
+  <p>{{ request.user.name }} さん、ようこそ。</p>
+  <p>メールアドレス：{{ request.user.email }}</p>
+  <p>住所：{{ request.user.address }}</p>
+  <p>電話番号：{{ request.user.tel }}</p>
+
+  <form method="post" action="{% url 'accounts:logout' %}" style="display:inline">
+    {% csrf_token %}
+    <button type="submit">LOGOUT</button>
+  </form>
+{% endblock %}
