@@ -17,20 +17,30 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
+    
+    def create_owner(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_owner_member', True)
+        return self.create_user(email, password, **extra_fields)
+
+
 
 class User(AbstractUser):
     username = None  # 使わない（メールログインにする）
     email = models.EmailField(unique=True)
 
     # 会員基本情報
-    name = models.CharField(max_length=100)
-    name_kana = models.CharField(max_length=100)
-    zipcode = models.CharField(max_length=10)
-    address = models.CharField(max_length=200)
-    tel = models.CharField(max_length=20)
-
+    name = models.CharField(max_length=10)
+    name_kana = models.CharField(max_length=10)
+    zipcode = models.CharField(max_length=8)
+    address = models.CharField(max_length=20)
+    tel = models.CharField(max_length=11)
+# companyIDとユーザー紐付け
     # 有料会員フラグ
     is_paid_member = models.BooleanField(default=False)
+    # オーナーメンバーフラグ
+    is_owner_member = models.BooleanField(default=False)
+
+
 
     # 監査用
     created_at = models.DateTimeField(auto_now_add=True)

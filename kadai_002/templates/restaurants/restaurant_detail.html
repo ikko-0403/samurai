@@ -11,6 +11,17 @@
     {% endif %}
   </div>
 
+  <form method="post" action="{% url 'restaurants:favorite_toggle' restaurant.pk %}" class="d-inline">
+  {% csrf_token %}
+  {% if is_favorited %}
+    <button type="submit" class="btn btn-sm btn-outline-danger">★ お気に入り解除</button>
+  {% else %}
+    <button type="submit" class="btn btn-sm btn-outline-primary">☆ お気に入り</button>
+  {% endif %}
+</form>
+<span class="ms-2 small">お気に入り {{ favorite_count }} 件</span>
+
+
   <div class="col-md-7">
     <h1 class="mb-2">{{ restaurant.name }}</h1>
 

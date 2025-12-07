@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}カテゴリ管理 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">カテゴリ管理</h1>
+
+<a href="{% url 'restaurants:owner_category_create' %}" class="btn btn-primary mb-3">
+  ＋ カテゴリを追加
+</a>
+
+<ul class="list-group">
+  {% for c in categories %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    {{ c.name }}
+    <span>
+      <a href="{% url 'restaurants:owner_category_edit' c.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+        編集
+      </a>
+      <a href="{% url 'restaurants:owner_category_delete' c.pk %}" class="btn btn-sm btn-outline-danger">
+        削除
+      </a>
+    </span>
+  </li>
+  {% empty %}
+  <li class="list-group-item text-muted">
+    カテゴリがありません
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

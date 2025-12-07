@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}会社情報 編集{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <h1 class="mb-4 h3">会社情報 編集</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">保存</button>
+        <a href="{% url 'restaurants:company_detail' %}" class="btn btn-secondary">戻る</a>
+    </form>
+
+</div>
+{% endblock %}

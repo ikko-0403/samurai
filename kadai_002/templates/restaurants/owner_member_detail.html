@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>会員詳細</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                {{ member.username }}
+            </h5>
+            <p class="card-text mb-1"><strong>ID:</strong> {{ member.id }}</p>
+            <p class="card-text mb-1"><strong>メールアドレス:</strong> {{ member.email }}</p>
+            <p class="card-text mb-1">
+                <strong>登録日:</strong> {{ member.date_joined|date:"Y-m-d H:i" }}
+            </p>
+            <p class="card-text mb-0">
+                <strong>最終ログイン:</strong>
+                {% if member.last_login %}
+                {{ member.last_login|date:"Y-m-d H:i" }}
+                {% else %}
+                まだログインなし
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}管理メニュー | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">管理メニュー</h1>
+
+<div class="list-group mb-4">
+  <a href="{% url 'restaurants:owner_restaurant_list' %}" class="list-group-item list-group-item-action">
+    店舗一覧・店舗管理
+  </a>
+  <a href="{% url 'restaurants:owner_category_list' %}" class="list-group-item list-group-item-action">
+    カテゴリ一覧・カテゴリ管理
+  </a>
+  <a href="{% url 'restaurants:owner_member_list' %}" class="list-group-item list-group-item-action">
+    会員一覧
+  </a> <a href="{% url 'restaurants:company_detail' %}" class="list-group-item list-group-item-action">
+    会社情報
+  </a>
+</div>
+
+<form method="post" action="{% url 'accounts:logout' %}">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-outline-danger btn-sm">
+    ログアウト
+  </button>
+</form>
+{% endblock %}

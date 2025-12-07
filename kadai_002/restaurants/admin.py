@@ -1,7 +1,9 @@
 # restaurants/admin.py
 from django.contrib import admin
-from .models import Company, Category, Restaurant
+from django.contrib.auth import get_user_model
+from .models import Company, Category, Restaurant, Favorite
 
+User = get_user_model()
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
@@ -13,11 +15,11 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'created_at')
-    search_fields = ('name',)
-    ordering = ('name',)
-    readonly_fields = ('created_at', 'updated_at')
-
+    list_display = ("id", "name", "is_active", "created_at")
+    list_editable = ("is_active",)
+    search_fields = ("name",)
+    list_filter = ("is_active",)
+    ordering = ("id",)
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
@@ -26,6 +28,7 @@ class RestaurantAdmin(admin.ModelAdmin):
         'name',
         'company',
         'category',
+        'owner',
         'price_min',
         'price_max',
         'open_time',
@@ -36,16 +39,16 @@ class RestaurantAdmin(admin.ModelAdmin):
     list_filter = ('company', 'category', 'holiday')
     search_fields = ('name', 'address')
     ordering = ('name',)
-    list_select_related = ('company', 'category')
+    list_select_related = ('company', 'category', 'owner')
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'company', 'category', 'image', 'description')
+            'fields': ('owner', 'name', 'company', 'category', 'image', 'description')
         }),
         ('営業情報', {
             'fields': ('price_min', 'price_max', 'open_time', 'close_time', 'holiday')
         }),
-        ('所在地', {
+        ('住所', {
             'fields': ('zipcode', 'address', 'tel')
         }),
         ('その他', {
@@ -54,3 +57,16 @@ class RestaurantAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('created_at', 'updated_at')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "owner":
+            # ★ オーナーメンバーだけを候補に
+            kwargs["queryset"] = User.objects.filter(is_owner_member=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ("user", "restaurant", "created_at")
+    list_filter = ("restaurant",)
+    search_fields = ("user__email", "restaurant__name")

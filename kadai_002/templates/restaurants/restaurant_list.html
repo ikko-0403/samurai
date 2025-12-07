@@ -1,60 +1,86 @@
+{# templates/restaurants/restaurant_list.html #}
 {% extends "base.html" %}
 {% block title %}店舗一覧 | NAGOYAMESHI{% endblock %}
 
 {% block content %}
 <h1 class="mb-4">店舗一覧</h1>
 
-{# ---- カテゴリ絞り込みボタン ---- #}
-<div class="mb-4">
-  {# すべてボタン #}
-  <a href="{% url 'restaurants:restaurant_list' %}"
-     class="btn btn-sm {% if not current_category_id %}btn-primary{% else %}btn-outline-primary{% endif %}">
-    すべて
-  </a>
+<!-- ▼ カテゴリ絞り込み ＋ カテゴリ名検索フォーム ▼ -->
+<form method="get" class="row g-2 mb-4">
 
-  {# 各カテゴリボタン #}
-  {% for cat in categories %}
-    <a href="{% url 'restaurants:restaurant_list' %}?category={{ cat.id }}"
-       class="btn btn-sm
-              {% if current_category_id == cat.id|stringformat:'s' %}
-                btn-primary
-              {% else %}
-                btn-outline-primary
-              {% endif %}">
-      {{ cat.name }}
+  <!-- カテゴリ選択（IDで絞り込み） -->
+  <div class="col-md-4">
+    <label class="form-label">カテゴリ</label>
+    <select name="category" class="form-select">
+      <option value="">すべて</option>
+      {% for c in categories %}
+      <option value="{{ c.id }}"
+      {% if c.id|stringformat:'s' == current_category_id %}selected{% endif %}>
+        {{ c.name }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- カテゴリ名で検索 -->
+  <div class="col-md-4">
+    <label class="form-label">カテゴリ名で検索</label>
+    <input type="text" name="category_keyword" class="form-control" placeholder="例）イタリアン、ラーメン…"
+      value="{{ category_keyword }}">
+  </div>
+
+  <div class="col-md-4 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary me-2">検索</button>
+    <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">
+      クリア
     </a>
-  {% endfor %}
-</div>
-
-{# ---- 店舗カード一覧 ---- #}
+  </div>
+</form>
+<!-- ▲ フィルタフォームここまで ▲ -->
+{# ==== 店舗カード一覧 ==== #}
 <div class="row g-4">
   {% for restaurant in restaurants %}
-    <div class="col-md-4 col-sm-6">
-      <div class="card h-100 shadow-sm">
-        {% if restaurant.image %}
-          <img src="{{ restaurant.image.url }}"
-               class="card-img-top"
-               alt="{{ restaurant.name }}">
+  <div class="col-md-4 col-sm-6">
+    <div class="card h-100 shadow-sm">
+      {% if restaurant.image %}
+      <img src="{{ restaurant.image.url }}" class="card-img-top" alt="{{ restaurant.name }}">
+      {% endif %}
+
+      <div class="card-body">
+        <h5 class="card-title">{{ restaurant.name }}</h5>
+        <p class="card-text small text-muted mb-1">
+          {{ restaurant.category.name }} / {{ restaurant.address }}
+        </p>
+        <p class="card-text small mb-2">
+          営業時間: {{ restaurant.open_time }}〜{{ restaurant.close_time }}
+        </p>
+
+        <p class="mb-1 text-muted small">
+          お気に入り {{ restaurant.favorite_count|default:0 }} 件
+        </p>
+
+        {% if user.is_authenticated %}
+        {% if restaurant.is_favorited %}
+        <a href="{% url 'restaurants:favorite_toggle' restaurant.pk %}?next={{ request.path }}"
+          class="btn btn-sm btn-outline-secondary me-2">
+          ★ 解除
+        </a>
+        {% else %}
+        <a href="{% url 'restaurants:favorite_toggle' restaurant.pk %}?next={{ request.path }}"
+          class="btn btn-sm btn-outline-primary me-2">
+          ☆ お気に入り
+        </a>
+        {% endif %}
         {% endif %}
 
-        <div class="card-body">
-          <h5 class="card-title">{{ restaurant.name }}</h5>
-          <p class="card-text small text-muted mb-1">
-            {{ restaurant.category.name }} / {{ restaurant.address }}
-          </p>
-          <p class="card-text small mb-2">
-            営業時間: {{ restaurant.open_time }}〜{{ restaurant.close_time }}
-          </p>
-
-          <a href="{% url 'restaurants:restaurant_detail' restaurant.pk %}"
-             class="btn btn-primary btn-sm">
-            詳細を見る
-          </a>
-        </div>
+        <a href="{% url 'restaurants:restaurant_detail' restaurant.pk %}" class="btn btn-primary btn-sm">
+          詳細を見る
+        </a>
       </div>
     </div>
+  </div>
   {% empty %}
-    <p>このカテゴリにはまだ店舗がありません。</p>
+  <p>このカテゴリにはまだ店舗がありません。</p>
   {% endfor %}
 </div>
 {% endblock %}

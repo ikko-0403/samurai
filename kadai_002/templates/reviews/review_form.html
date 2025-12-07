@@ -8,7 +8,7 @@
   <div class="mb-3">
     <label class="form-label">評価</label>
     {# ←★ここで form.rating は出さない！ #}
-    {% with current=form.data.rating|default:form.initial.rating|default:form.instance.rating %}
+    {% with current=form.data.rating|default:3|default:form.instance.rating %}
     <fieldset class="rating" role="radiogroup" aria-label="星による評価">
       <input type="radio" id="star5" name="rating" value="5"
              {% if current|stringformat:"s" == "5" %}checked{% endif %}>

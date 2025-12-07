@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}お気に入り | NAGOYAMESHI{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">お気に入り店舗</h1>
+
+{% if restaurants %}
+  <div class="row">
+    {% for r in restaurants %}
+      <div class="col-md-4 mb-3">
+        <div class="card h-100">
+          {% if r.image %}
+            <img src="{{ r.image.url }}" class="card-img-top" alt="{{ r.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ r.name }}</h5>
+            <div class="small text-muted mb-1">★ {{ r.avg_rating|default:0|floatformat:1 }}（{{ r.review_count }}件）</div>
+            <div class="small text-muted">お気に入り {{ r.favorite_count }} 件</div>
+            <a href="{% url 'restaurants:restaurant_detail' r.pk %}" class="btn btn-sm btn-outline-secondary mt-2">詳細へ</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>まだお気に入りはありません。</p>
+{% endif %}
+{% endblock %}
