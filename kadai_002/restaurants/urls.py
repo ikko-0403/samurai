@@ -35,4 +35,9 @@ urlpatterns = [
     # --- オーナー管理画面：会員管理 ---
     path("owner/members/", views.OwnerMemberListView.as_view(), name="owner_member_list"),
     path("owner/members/<int:pk>/", views.OwnerMemberDetailView.as_view(), name="owner_member_detail"),
+
+    # ▼▼▼ CSV ▼▼▼
+    path('owner/restaurants/export/', views.OwnerRestaurantCSVView.as_view(), name='owner_restaurant_csv'),
+    path('owner/categories/export/', views.OwnerCategoryCSVView.as_view(), name='owner_category_csv'),
+    path('owner/members/export/', views.OwnerMemberCSVView.as_view(), name='owner_member_csv'),
 ]

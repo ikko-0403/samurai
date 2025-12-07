@@ -17,8 +17,7 @@ class CompanyForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        # モデルに sort_order や is_active があるなら、ここに追加せんと編集できんよ
-        fields = ["name", "is_active"] 
+        fields = ['name', 'is_active']
         labels = {
             "name": "カテゴリ名",
             "is_active": "有効",
@@ -58,7 +57,8 @@ class OwnerRestaurantForm(forms.ModelForm):
 
         # ログインユーザーの会社に紐付くカテゴリだけに絞り込み
         if user and hasattr(user, 'company') and user.company:
-            self.fields['category'].queryset = Category.objects.filter(company=user.company)
+            self.fields['category'].queryset = Category.objects.filter(company=user.company, is_active=True)
+            
         else:
             # 会社未登録ならカテゴリは選べない（空にする）
             self.fields['category'].queryset = Category.objects.none()

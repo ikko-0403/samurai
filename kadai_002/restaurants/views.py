@@ -364,7 +364,7 @@ class OwnerMemberListView(LoginRequiredMixin, OwnerRequiredMixin, ListView):
             # ▼▼▼ もし「未設定」と検索されたら、中身が空っぽの人を探す ▼▼▼
             if keyword == "未設定":
                 qs = qs.filter(name='')
-                
+
             else:
                 # それ以外は普通に検索
                 qs = qs.filter(
@@ -388,42 +388,92 @@ class OwnerMemberDetailView(LoginRequiredMixin, OwnerRequiredMixin, DetailView):
         return ctx
 
 
-class OwnerMemberCSVView(OwnerMemberListView):
-    """
-    検索結果をCSVでダウンロードするビュー
-    OwnerMemberListView を継承してるから、get_queryset（検索絞り込み）がそのまま使える！
-    """
+# 1. 店舗一覧CSV出力
+class OwnerRestaurantCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # 1. レスポンスの設定
-        # 【重要】WindowsのExcelで開くなら 'Shift-JIS' (cp932) が必須！
-        # utf-8だと文字化けしてクレームになるリスクがあるぞな。
+        # レスポンスの設定 (文字コードはcp932=Shift_JIS)
+        # ※注意：cp932は一部の特殊文字（ハシゴ高など）でエラーになる可能性があるけん、
+        # もしエラーが出たら 'utf-8-sig' に戻すのが無難よ。
         response = HttpResponse(content_type='text/csv; charset=cp932')
-        
-        # ファイル名を作成（例: members_20251205.csv）
-        timestamp = timezone.now().strftime("%Y%m%d")
-        filename = f"members_{timestamp}.csv"
-        
-        # 日本語ファイル名の文字化けを防ぐためのエンコード処理
-        quoted_filename = urllib.parse.quote(filename)
-        response['Content-Disposition'] = f'attachment; filename="{quoted_filename}"'
+        filename = urllib.parse.quote("店舗一覧.csv")
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-        # 2. CSVライターの作成
         writer = csv.writer(response)
+        # ヘッダー行
+        writer.writerow(['ID', '店舗名', 'カテゴリ', '住所', '電話番号'])
 
-        # 3. ヘッダー行（1行目）を書き込む
-        header = ['ID', 'ユーザー名', 'メールアドレス', '登録日時']
-        writer.writerow(header)
+        # 1. まずは自分の会社の店舗に絞り込み
+        if hasattr(request.user, 'company'):
+            restaurants = Restaurant.objects.filter(company=request.user.company)
+        else:
+            return response # 会社がない場合は空で返す
 
-        # 4. データ行を書き込む
-        # get_queryset() を呼ぶことで、画面と同じ「検索後のデータ」が取れる！
-        queryset = self.get_queryset()
+        # 2. 【ここを追加】検索条件があればさらに絞り込む
+        keyword = request.GET.get('keyword')
+        if keyword:
+            # 店舗名にキーワードが含まれるか
+            restaurants = restaurants.filter(name__icontains=keyword)
 
-        for user in queryset:
+        category_id = request.GET.get('category')
+        if category_id:
+            # カテゴリが選択されていれば一致するものを
+            restaurants = restaurants.filter(category_id=category_id)
+
+        # 3. データ書き込み
+        for r in restaurants:
             writer.writerow([
-                user.id,
-                user.username,
-                user.email,
-                user.date_joined.strftime("%Y/%m/%d %H:%M"),
+                r.id, 
+                r.name, 
+                r.category.name if r.category else '', 
+                r.address, 
+                r.tel
             ])
+
+        return response
+
+# 2. カテゴリ一覧CSV出力
+class OwnerCategoryCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type='text/csv; charset=cp932')
+        filename = urllib.parse.quote("カテゴリ一覧.csv")
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'カテゴリ名', '有効フラグ'])
+
+        # 自分の会社のカテゴリ
+        if hasattr(request.user, 'company'):
+            categories = Category.objects.filter(company=request.user.company)
+        else:
+            categories = Category.objects.none()
+
+        for c in categories:
+            status = "有効" if c.is_active else "無効"
+            writer.writerow([c.id, c.name, status])
+
+        return response
+
+# 3. 会員一覧CSV出力
+class OwnerMemberCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+        filename = urllib.parse.quote("会員一覧.csv")
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        writer = csv.writer(response)
+        writer.writerow(['ID', '名前', 'メールアドレス', '登録日'])
+        members = User.objects.all().order_by('-date_joined')
+        query = request.GET.get('keyword') 
+
+        if query:
+            # 半角スペースで区切られた場合のAND検索対応など、
+            # 一覧画面の実装レベルに合わせる必要があるが、まずは基本形
+            members = members.filter(
+                Q(name__icontains=query) | Q(email__icontains=query)
+            )
+
+        # データ書き込み（メモリ節約のため iterator を使うのがベター）
+        for m in members.iterator():
+            joined_at = m.date_joined.strftime('%Y-%m-%d') if m.date_joined else ''
+            writer.writerow([m.id, m.name, m.email, joined_at])
 
         return response

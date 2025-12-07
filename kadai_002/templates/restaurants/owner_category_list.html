@@ -27,4 +27,9 @@
   </li>
   {% endfor %}
 </ul>
+<div class="d-flex justify-content-end mt-3">
+  <a href="{% url 'restaurants:owner_category_csv' %}" class="btn btn-secondary">
+    CSV出力
+  </a>
+</div>
 {% endblock %}
