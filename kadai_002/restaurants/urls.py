@@ -36,6 +36,8 @@ urlpatterns = [
     path("owner/members/", views.OwnerMemberListView.as_view(), name="owner_member_list"),
     path("owner/members/<int:pk>/", views.OwnerMemberDetailView.as_view(), name="owner_member_detail"),
 
+    path('owner/members/create/', views.OwnerMemberCreateView.as_view(), name='owner_member_create'),
+
     # ▼▼▼ CSV ▼▼▼
     path('owner/restaurants/export/', views.OwnerRestaurantCSVView.as_view(), name='owner_restaurant_csv'),
     path('owner/categories/export/', views.OwnerCategoryCSVView.as_view(), name='owner_category_csv'),

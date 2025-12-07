@@ -1,5 +1,13 @@
 from django import forms
+# ▼▼▼ 追加：ユーザー作成用に必要なインポート ▼▼▼
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
+# ▲▲▲ 追加終わり ▲▲▲
+
 from .models import Company, Category, Restaurant
+
+# Userモデルを取得（カスタムユーザー対応）
+User = get_user_model()
 
 class CompanyForm(forms.ModelForm):
     class Meta:
@@ -13,6 +21,15 @@ class CompanyForm(forms.ModelForm):
             "address": "住所",
             "business": "事業内容",
         }
+        # Bootstrap適用（CompanyFormにも適用しておくと綺麗です）
+        widgets = {
+            "name": forms.TextInput(attrs={'class': 'form-control'}),
+            "representative": forms.TextInput(attrs={'class': 'form-control'}),
+            "established_at": forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            "zipcode": forms.TextInput(attrs={'class': 'form-control'}),
+            "address": forms.TextInput(attrs={'class': 'form-control'}),
+            "business": forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -22,8 +39,11 @@ class CategoryForm(forms.ModelForm):
             "name": "カテゴリ名",
             "is_active": "有効",
         }
+        widgets = {
+            "name": forms.TextInput(attrs={'class': 'form-control'}),
+            "is_active": forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
-# 店舗登録・編集用フォーム（修正版）
 class OwnerRestaurantForm(forms.ModelForm):
     class Meta:
         model = Restaurant
@@ -33,11 +53,10 @@ class OwnerRestaurantForm(forms.ModelForm):
             "open_time", "close_time", "holiday",
             "zipcode", "address", "tel",
         ]
-
-# ▼▼▼ ここでデザイン（Bootstrap）を当てる ▼▼▼
+        # ▼▼▼ ここでデザイン（Bootstrap）を当てる ▼▼▼
         widgets = {
             "name": forms.TextInput(attrs={'class': 'form-control', 'placeholder': '店舗名を入力'}),
-            "category": forms.Select(attrs={'class': 'form-select'}), # セレクトボックス用
+            "category": forms.Select(attrs={'class': 'form-select'}), 
             "image": forms.ClearableFileInput(attrs={'class': 'form-control'}),
             "description": forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': '店舗の魅力を入力してください'}),
             "price_min": forms.NumberInput(attrs={'class': 'form-control', 'step': '100'}),
@@ -58,7 +77,26 @@ class OwnerRestaurantForm(forms.ModelForm):
         # ログインユーザーの会社に紐付くカテゴリだけに絞り込み
         if user and hasattr(user, 'company') and user.company:
             self.fields['category'].queryset = Category.objects.filter(company=user.company, is_active=True)
-            
         else:
-            # 会社未登録ならカテゴリは選べない（空にする）
             self.fields['category'].queryset = Category.objects.none()
+
+
+# ▼▼▼ 追加：オーナー追加作成用のフォーム ▼▼▼
+class OwnerMemberCreateForm(UserCreationForm):
+    """
+    既存のオーナーが、新しいオーナー（管理者）を作成するためのフォーム
+    パスワード入力欄などはUserCreationFormが自動で作ってくれます。
+    """
+    class Meta:
+        model = User
+        fields = ('name', 'email') 
+        labels = {
+            "name": "担当者名",
+            "email": "メールアドレス",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # フォームの全フィールドにBootstrapのクラスを一括適用
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'

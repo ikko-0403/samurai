@@ -48,8 +48,7 @@ class User(AbstractUser):
 
     # ログイン時に使うフィールド
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  # superuser作成時に必須項目を追加するならここ
-
+    REQUIRED_FIELDS = ['name', 'name_kana', 'zipcode', 'address', 'tel']
     objects = CustomUserManager()
 
     def __str__(self):

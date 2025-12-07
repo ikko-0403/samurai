@@ -8,7 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.contrib.auth import get_user_model
 from .models import Restaurant, Category, Favorite, Company
-from .forms import CompanyForm, CategoryForm, OwnerRestaurantForm
+from .forms import CompanyForm, CategoryForm, OwnerRestaurantForm, OwnerMemberCreateForm
 import csv
 import urllib.parse
 from django.http import HttpResponse
@@ -477,3 +477,25 @@ class OwnerMemberCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
             writer.writerow([m.id, m.name, m.email, joined_at])
 
         return response
+    
+# オーナーメンバー増やす
+class OwnerMemberCreateView(LoginRequiredMixin, OwnerRequiredMixin, CreateView):
+    model = User
+    form_class = OwnerMemberCreateForm
+    template_name = 'restaurants/owner_member_create.html'
+    success_url = reverse_lazy('restaurants:owner_member_list') # 作成後は一覧に戻る
+
+    def form_valid(self, form):
+        # フォームの入力値を取得（まだDBには保存しない）
+        new_user = form.save(commit=False)
+        
+        # 1. 管理者権限を付与
+        new_user.is_owner_member = True
+        
+        # 2. 会社IDの引継ぎ
+        # ログイン中のオーナーと同じ会社に所属させる
+        if hasattr(self.request.user, 'company'):
+            new_user.company = self.request.user.company
+            
+        new_user.save()
+        return super().form_valid(form)
