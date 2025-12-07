@@ -11,14 +11,18 @@
             </h5>
             <p class="card-text mb-1"><strong>ID:</strong> {{ member.id }}</p>
             <p class="card-text mb-1"><strong>メールアドレス:</strong> {{ member.email }}</p>
-            <p class="card-text mb-1">
-                <strong>会員種別:</strong>
-                {% if member.is_superuser %}
-                <span class="badge bg-danger">管理者</span>
+            <dt class="col-sm-3">会員種別</dt>
+            <dd class="col-sm-9">
+                {% if member.is_owner_member %}
+                <span class="badge bg-warning text-dark border border-warning">
+                    オーナー
+                </span>
+                {% elif member.is_staff %}
+                <span class="badge bg-danger">システム管理者</span>
                 {% else %}
                 <span class="badge bg-secondary">一般ユーザー</span>
                 {% endif %}
-            </p>
+            </dd>
             <p class="card-text mb-1">
                 <strong>登録日:</strong> {{ member.date_joined|date:"Y-m-d H:i" }}
             </p>

@@ -355,28 +355,28 @@ class OwnerMemberListView(LoginRequiredMixin, OwnerRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        # 1. 【変更】絞り込みなしで全ユーザーを取得
+        # ただし、会社名を表示するなら select_related は必須（高速化のため）
+        qs = User.objects.all().select_related('company')
+
+        # 2. 検索機能
         keyword = self.request.GET.get('keyword')
         if keyword:
             keyword = keyword.strip()
-        
-        if keyword:
-            # ▼▼▼ もし「未設定」と検索されたら、中身が空っぽの人を探す ▼▼▼
             if keyword == "未設定":
                 qs = qs.filter(name='')
-
             else:
-                # それ以外は普通に検索
                 qs = qs.filter(
                     Q(name__icontains=keyword) | Q(email__icontains=keyword)
                 )
 
+        # 新しい順に表示
         return qs.order_by("-date_joined")
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['keyword'] = self.request.GET.get('keyword', '')
         return ctx
-
 
 class OwnerMemberDetailView(LoginRequiredMixin, OwnerRequiredMixin, DetailView):
     model = User
