@@ -6,7 +6,6 @@
     <title>{% block title %}NAGOYAMESHI{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS（CDN） -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -26,7 +25,6 @@
             font-size: 2rem;
             line-height: 1;
             color: #bbb;
-            /* 枠の色 */
             cursor: pointer;
             user-select: none;
             transition: color .15s ease;
@@ -53,7 +51,7 @@
             outline-offset: 2px;
         }
 
-        /* Django の RadioSelect 用（横並び） */
+        /* Django の RadioSelect 用 */
         .rating-inline ul {
             list-style: none;
             padding: 0;
@@ -82,16 +80,24 @@
         .navbar.navbar-dark .navbar-text,
         .navbar.navbar-dark .navbar-nav .nav-link,
         .navbar.navbar-dark .navbar-nav .nav-link:visited,
-        .navbar.navbar-dark .btn-link.nav-link {
+        .navbar.navbar-dark .btn-link.nav-link,
+        .navbar.navbar-dark .dropdown-toggle {
             color: #ffffff !important;
+        }
+
+        /* ドロップダウンの中身は黒文字に戻す */
+        .dropdown-menu .dropdown-item {
+            color: #212529 !important;
+        }
+
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #f8f9fa;
         }
     </style>
 </head>
-<!-- ★ フッター固定用：縦方向flex＋高さ100vh -->
 
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <!-- ナビバー -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">NAGOYAMESHI</a>
@@ -105,73 +111,79 @@
                 <ul class="navbar-nav ms-auto align-items-center">
 
                     {% if user.is_authenticated %}
+
+                    {% if user.is_owner_member %}
                     <li class="nav-item">
-                        <span class="navbar-text me-3 text-white">
-                            ようこそ、{{ user.name|default:user.email }} さん
-                        </span>
-                    </li>
-
-
-
-
-                    {# ホームリンク（オーナーかどうかで出し分け） #}
-                    {% if user.is_authenticated and user.is_owner_member %}
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:owner_dashboard' %}">ホーム</a>
+                        <a class="nav-link me-2" href="{% url 'restaurants:owner_dashboard' %}">ホーム</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:restaurant_list' %}">ホーム</a>
+                        <a class="nav-link me-2" href="{% url 'restaurants:restaurant_list' %}">ホーム</a>
                     </li>
                     {% endif %}
 
 
                     {% if user.is_owner_member %}
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:owner_restaurant_list' %}">店舗管理</a>
+                    <li class="nav-item"><a class="nav-link"
+                            href="{% url 'restaurants:owner_restaurant_list' %}">店舗管理</a></li>
+                    <li class="nav-item"><a class="nav-link"
+                            href="{% url 'restaurants:owner_category_list' %}">カテゴリ管理</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'restaurants:owner_member_list' %}">会員一覧</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:owner_category_list' %}">カテゴリ管理</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:owner_member_list' %}">会員一覧</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'restaurants:company_detail' %}">会社情報</a>
-                    </li>
-                    <li class="nav-item">
-                        {# ログアウトは必ず form で POST 送信すること！ #}
-                        <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link nav-link text-white border-0 bg-transparent">
-                                ログアウト
-                            </button>
-                        </form>
-                    </li>
-
+                    <li class="nav-item"><a class="nav-link" href="{% url 'restaurants:company_detail' %}">会社情報</a></li>
                     {% endif %}
+
+
+                    <li class="nav-item dropdown ms-2">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.name|default:user.email }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+
+                            <li><a class="dropdown-item" href="#">会員情報</a></li>
+                            <li><a class="dropdown-item" href="#">予約一覧</a></li>
+                            <li><a class="dropdown-item" href="#">お気に入り一覧</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li><a class="dropdown-item" href="#">お支払い方法</a></li>
+                            <li><a class="dropdown-item" href="#">有料プラン解約</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item w-100 text-start">
+                                        ログアウト
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
 
                     {% else %}
+                    {# ログインしていない場合 #}
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'accounts:login' %}">ログイン</a>
+                        <a class="nav-link" href="{% url 'accounts:login' %}">ログイン</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'accounts:signup' %}">新規登録</a>
+                        <a class="nav-link" href="{% url 'accounts:signup' %}">新規登録</a>
                     </li>
                     {% endif %}
+
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- メインコンテンツ -->
-    <!-- ★ flex-grow-1 で余白をここに持たせてフッターを下に押す -->
     <main class="container mb-5 flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- フッター -->
-    <!-- ★ mt-auto でflexの一番下に寄せる -->
     <footer class="bg-dark text-light py-3 mt-auto">
         <div class="container text-center small">
             &copy; {{ now|default:"2025" }} NAGOYAMESHI

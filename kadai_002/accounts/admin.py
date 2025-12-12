@@ -1,10 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User
+from .forms import CustomUserCreationForm
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     model = User
+    add_form = CustomUserCreationForm
 
     # 一覧画面の表示設定
     list_display = ('email', 'name', 'is_owner_member', 'is_paid_member', 'is_staff', 'is_active') # is_activeを追加して状態を見える化
@@ -18,14 +20,12 @@ class CustomUserAdmin(UserAdmin):
     )
 
     # 【修正】編集画面の構成
-    # デフォルトの削除ボタンは画面左下に自動で表示されるけん、ここで設定する必要はないで
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("プロフィール情報", {"fields": ("name", "tel", "zipcode", "address")}), # 住所なども見れた方がええかも
-        ("権限・状態", {"fields": ("is_active", "is_staff", "is_superuser", "is_owner_member", "is_paid_member")}), # 【重要】ここを追加
+        ("プロフィール情報", {"fields": ("name", "company", "tel", "zipcode", "address")}), 
+        ("権限・状態", {"fields": ("is_active", "is_staff", "is_superuser", "is_owner_member", "is_paid_member")}),
         ("ログイン情報", {"fields": ("last_login", "date_joined")}),
     )
-
     # 新規作成時の設定（そのままでOK）
     add_fieldsets = (
         (None, {
@@ -33,13 +33,16 @@ class CustomUserAdmin(UserAdmin):
             "fields": (
                 "email",
                 "name",
+                'company',
+                "tel",
+                'zipcode',
+                "address",
                 "password1",
-                "password2",
                 "is_owner_member",
                 "is_paid_member",
                 "is_staff",
                 "is_superuser",
-                "is_active", # 新規作成時にも有効/無効を選べると便利
+                "is_active",
             ),
         }),
     )

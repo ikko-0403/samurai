@@ -6,7 +6,7 @@ class Company(models.Model):
     owner = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="company",
+        related_name="owned_company",
         null=True,  # 既存データがあるなら最初は許可しておくと楽
         blank=True,
     )

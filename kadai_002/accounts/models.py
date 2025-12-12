@@ -35,6 +35,15 @@ class User(AbstractUser):
     address = models.CharField(max_length=20)
     tel = models.CharField(max_length=11)
 # companyIDとユーザー紐付け
+    company = models.ForeignKey(
+        'restaurants.Company', 
+        verbose_name='所属会社',
+        on_delete=models.SET_NULL, 
+        null=True,
+        blank=True,
+        related_name='staff_members'
+    )
+
     # 有料会員フラグ
     is_paid_member = models.BooleanField(default=False)
     # オーナーメンバーフラグ
