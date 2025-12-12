@@ -29,7 +29,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
 
     # 会員基本情報
-    company = models.ForeignKey('restaurants.Company', on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=10)
     name_kana = models.CharField(max_length=10)
     zipcode = models.CharField(max_length=8)
