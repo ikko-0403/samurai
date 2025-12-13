@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}会員情報 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">会員情報</h2>
+
+        <div class="card">
+            <div class="card-body">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th class="w-25 bg-light">メールアドレス</th>
+                            <td>{{ profile_user.email }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">氏名</th>
+                            <td>{{ profile_user.name|default:"未設定" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">氏名（カナ）</th>
+                            <td>{{ profile_user.name_kana|default:"未設定" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">郵便番号</th>
+                            <td>{{ profile_user.zipcode|default:"未設定" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">住所</th>
+                            <td>{{ profile_user.address|default:"未設定" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">電話番号</th>
+                            <td>{{ profile_user.tel|default:"未設定" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">会員種別</th>
+                            <td>
+                                {% if profile_user.is_paid_member %}
+                                <span class="badge bg-primary">有料会員</span>
+                                {% else %}
+                                <span class="badge bg-secondary">無料会員</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">登録日</th>
+                            <td>{{ profile_user.created_at|date:"Y年n月j日" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'accounts:user_profile_edit' %}" class="btn btn-primary">
+                        編集する
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -134,6 +134,8 @@
                     {% endif %}
 
 
+                    {% if not user.is_owner_member %}
+                    {# 一般ユーザーのみプルダウンメニューを表示 #}
                     <li class="nav-item dropdown ms-2">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -141,15 +143,17 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
 
-                            <li><a class="dropdown-item" href="#">会員情報</a></li>
-                            <li><a class="dropdown-item" href="#">予約一覧</a></li>
-                            <li><a class="dropdown-item" href="#">お気に入り一覧</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:user_profile' %}">会員情報</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reservations:reservation_list' %}">予約一覧</a></li>
+                            <li><a class="dropdown-item" href="{% url 'restaurants:my_favorite_list' %}">お気に入り一覧</a>
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
 
-                            <li><a class="dropdown-item" href="#">お支払い方法</a></li>
-                            <li><a class="dropdown-item" href="#">有料プラン解約</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:payment_method' %}">お支払い方法</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:subscription_cancel' %}">有料プラン解約</a>
+                            </li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -164,6 +168,20 @@
                             </li>
                         </ul>
                     </li>
+                    {% else %}
+                    {# オーナーユーザーの場合は名前とログアウトボタンのみ #}
+                    <li class="nav-item ms-2">
+                        <span class="navbar-text me-2">{{ user.name|default:user.email }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link nav-link">
+                                ログアウト
+                            </button>
+                        </form>
+                    </li>
+                    {% endif %}
 
                     {% else %}
                     {# ログインしていない場合 #}

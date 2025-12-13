@@ -10,4 +10,12 @@ urlpatterns = [
     path('logout/',LogoutView.as_view(next_page='accounts:login'),name='logout'),
     path('signup/', views.SignUpView.as_view(),name='signup'),
     path('mypage/', views.MyPageView.as_view(),name='mypage'),
+    
+    # 会員情報
+    path('user/profile/', views.UserProfileView.as_view(), name='user_profile'),
+    path('user/profile/edit/', views.UserProfileEditView.as_view(), name='user_profile_edit'),
+    
+    # お支払い・サブスクリプション
+    path('user/payment/', views.PaymentMethodView.as_view(), name='payment_method'),
+    path('user/subscription/cancel/', views.SubscriptionCancelView.as_view(), name='subscription_cancel'),
 ]

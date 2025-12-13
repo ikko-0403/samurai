@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}お支払い方法 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">お支払い方法</h2>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">現在の会員ステータス</h5>
+                <p class="mb-0">
+                    {% if user.is_paid_member %}
+                    <span class="badge bg-primary fs-6">有料会員</span>
+                    {% else %}
+                    <span class="badge bg-secondary fs-6">無料会員</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        {% if user.is_paid_member %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">登録済みのお支払い方法</h5>
+                <div class="alert alert-info">
+                    <p class="mb-0">
+                        <i class="bi bi-credit-card"></i> カード情報: ****-****-****-1234<br>
+                        <small class="text-muted">有効期限: 12/2025</small>
+                    </p>
+                </div>
+                <button class="btn btn-outline-primary" disabled>
+                    お支払い方法を変更
+                </button>
+                <p class="small text-muted mt-2">
+                    ※決済システム連携機能は今後実装予定です
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">有料プランのご案内</h5>
+                <p>有料プランに登録すると、以下の特典がご利用いただけます：</p>
+                <ul>
+                    <li>予約の優先受付</li>
+                    <li>限定クーポンの配信</li>
+                    <li>ポイント2倍キャンペーン</li>
+                </ul>
+                <p class="fw-bold">月額料金: ¥500（税込）</p>
+                <button class="btn btn-primary" disabled>
+                    有料プランに登録
+                </button>
+                <p class="small text-muted mt-2">
+                    ※決済システム連携機能は今後実装予定です
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

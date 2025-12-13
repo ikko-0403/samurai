@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}有料プラン解約 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">有料プラン解約</h2>
+
+        {% if user.is_paid_member %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-danger">有料プランを解約しますか？</h5>
+
+                <div class="alert alert-warning mt-3">
+                    <h6 class="alert-heading">解約時の注意事項</h6>
+                    <ul class="mb-0">
+                        <li>解約すると、有料会員限定の特典がご利用いただけなくなります</li>
+                        <li>既に作成された予約は有効です</li>
+                        <li>保有ポイントは引き続きご利用いただけます</li>
+                        <li>再度有料プランに登録することも可能です</li>
+                    </ul>
+                </div>
+
+                <div class="mt-4">
+                    <p class="fw-bold">現在のプラン情報</p>
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th class="w-50">プラン</th>
+                                <td>有料会員（月額¥500）</td>
+                            </tr>
+                            <tr>
+                                <th>登録日</th>
+                                <td>{{ user.created_at|date:"Y年n月j日" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger" disabled
+                            onclick="return confirm('本当に解約しますか？この操作は取り消せません。');">
+                            有料プランを解約する
+                        </button>
+                        <a href="{% url 'accounts:user_profile' %}" class="btn btn-outline-secondary">
+                            キャンセル
+                        </a>
+                    </div>
+                </form>
+
+                <p class="small text-muted mt-3">
+                    ※解約機能は今後実装予定です
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <h5 class="alert-heading">無料会員です</h5>
+            <p class="mb-0">現在、有料プランには登録されていません。</p>
+            <hr>
+            <a href="{% url 'accounts:payment_method' %}" class="btn btn-primary btn-sm">
+                有料プランに登録する
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
