@@ -89,10 +89,14 @@ class OwnerMemberCreateForm(UserCreationForm):
     """
     class Meta:
         model = User
-        fields = ('name', 'email') 
+        fields = ('name', 'name_kana', 'email', 'zipcode', 'address', 'tel') 
         labels = {
             "name": "担当者名",
+            "name_kana": "担当者名（カナ）",
             "email": "メールアドレス",
+            "zipcode": "郵便番号",
+            "address": "住所",
+            "tel": "電話番号",
         }
 
     def __init__(self, *args, **kwargs):
