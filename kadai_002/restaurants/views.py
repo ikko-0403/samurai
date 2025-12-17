@@ -152,6 +152,13 @@ def favorite_toggle(request, restaurant_pk):
             request,
             'お気に入り機能は有料プラン会員限定です。有料プランに登録してご利用ください。'
         )
+        # Ajaxリクエストの場合はリダイレクト情報を返す
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            from django.http import JsonResponse
+            return JsonResponse({
+                'success': False,
+                'redirect': reverse('accounts:payment_method')
+            })
         return redirect('accounts:payment_method')
     
     restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
@@ -162,14 +169,30 @@ def favorite_toggle(request, restaurant_pk):
     if not created:
         # すでにあれば削除 = 解除
         fav.delete()
+        is_favorited = False
+    else:
+        is_favorited = True
 
-    # 元のページに戻す（next優先→Referer→なければ詳細ページ）
+    # お気に入り件数を取得
+    favorite_count = restaurant.favorites.count()
+
+    # Ajaxリクエストの場合はJSONレスポンスを返す
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+        from django.http import JsonResponse
+        return JsonResponse({
+            'success': True,
+            'is_favorited': is_favorited,
+            'favorite_count': favorite_count
+        })
+
+    # 通常のリクエストの場合は元のページに戻す
     next_url = (
         request.GET.get('next')
         or request.META.get('HTTP_REFERER')
         or reverse('restaurants:restaurant_detail', args=[restaurant.pk])
     )
     return redirect(next_url)
+
 
 
 
