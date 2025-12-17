@@ -4,31 +4,39 @@
 {% block content %}
 <h1 class="mb-4">店舗一覧</h1>
 
-<!-- ▼ カテゴリ絞り込み ＋ カテゴリ名検索フォーム ▼ -->
+<!-- ▼ 検索・絞り込み・並び替えフォーム ▼ -->
 <form method="get" class="row g-2 mb-4">
 
-  <!-- カテゴリ選択（IDで絞り込み） -->
-  <div class="col-md-4">
+  <!-- 店舗名検索 -->
+  <div class="col-md-3">
+    <label class="form-label">店舗名</label>
+    <input type="text" name="keyword" class="form-control" placeholder="店舗名で検索" value="{{ keyword }}">
+  </div>
+
+  <!-- カテゴリ選択（名前で絞り込み） -->
+  <div class="col-md-3">
     <label class="form-label">カテゴリ</label>
-    <select name="category" class="form-select">
+    <select name="category_name" class="form-select">
       <option value="">すべて</option>
-      {% for c in categories %}
-      <option value="{{ c.id }}"
-      {% if c.id|stringformat:'s' == current_category_id %}selected{% endif %}>
-        {{ c.name }}
+      {% for category_name in category_names %}
+      <option value="{{ category_name }}" {% if category_name == request.GET.category_name %}selected{% endif %}>
+        {{ category_name }}
       </option>
       {% endfor %}
     </select>
   </div>
 
-  <!-- カテゴリ名で検索 -->
-  <div class="col-md-4">
-    <label class="form-label">カテゴリ名で検索</label>
-    <input type="text" name="category_keyword" class="form-control" placeholder="例）イタリアン、ラーメン…"
-      value="{{ category_keyword }}">
+  <!-- 並び替え -->
+  <div class="col-md-3">
+    <label class="form-label">並び替え</label>
+    <select name="sort" class="form-select">
+      <option value="default" {% if sort == "default" %}selected{% endif %}>新しい順</option>
+      <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>価格が安い順</option>
+      <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>価格が高い順</option>
+    </select>
   </div>
 
-  <div class="col-md-4 d-flex align-items-end">
+  <div class="col-md-3 d-flex align-items-end">
     <button type="submit" class="btn btn-primary me-2">検索</button>
     <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">
       クリア

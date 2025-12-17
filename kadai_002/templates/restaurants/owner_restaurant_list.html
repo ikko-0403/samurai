@@ -60,7 +60,7 @@
     {% for r in restaurants %}
     <tr>
       <td>{{ r.id }}</td>
-      <td>{{ r.name }}</td>
+      <td><a href="{% url 'restaurants:owner_restaurant_detail' r.pk %}">{{ r.name }}</a></td>
       <td>{{ r.company.name }}</td>
       <td>{{ r.category.name }}</td>
       <td>¥{{ r.price_min }}〜¥{{ r.price_max }}</td>

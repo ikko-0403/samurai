@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}予約 - {{ restaurant.name }} | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">
+            {% if is_edit %}
+            予約編集
+            {% else %}
+            予約
+            {% endif %}</h2>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ restaurant.name }}</h5>
+                <p class="card-text">
+                    <i class="bi bi-geo-alt"></i> {{ restaurant.address }}<br>
+                    <i class="bi bi-telephone"></i> {{ restaurant.tel }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-4">{% if is_edit %}予約情報を編集{% else %}予約情報を入力{% endif %}</h5>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.reservation_date.id_for_label }}" class="form-label">
+                            {{ form.reservation_date.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.reservation_date }}
+                        {% if form.reservation_date.errors %}
+                        <div class="text-danger small">
+                            {{ form.reservation_date.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.reservation_time.id_for_label }}" class="form-label">
+                            {{ form.reservation_time.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.reservation_time }}
+                        {% if form.reservation_time.errors %}
+                        <div class="text-danger small">
+                            {{ form.reservation_time.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.party_size.id_for_label }}" class="form-label">
+                            {{ form.party_size.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.party_size }}
+                        {% if form.party_size.errors %}
+                        <div class="text-danger small">
+                            {{ form.party_size.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">
+                            {{ form.notes.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            {% if is_edit %}
+                            更新する
+                            {% else %}
+                            予約する
+                            {% endif %}
+                        </button>    
+                        <a href="{% if is_edit %}{% url 'reservations:reservation_list' %}{% else %}{% url 'restaurants:restaurant_detail' restaurant.pk %}{% endif %}"
+                            class="btn btn-outline-secondary">
+                            キャンセル
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

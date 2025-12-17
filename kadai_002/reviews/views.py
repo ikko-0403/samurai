@@ -6,9 +6,11 @@ from .forms import ReviewForm
 from .models import Review
 from restaurants.models import Restaurant
 from django.db.models import Avg, Count
+from accounts.mixins import PaidMemberRequiredMixin
 
 
-class ReviewCreateView(LoginRequiredMixin, CreateView):
+
+class ReviewCreateView(PaidMemberRequiredMixin, LoginRequiredMixin, CreateView):
     model = Review
     form_class = ReviewForm
     template_name = 'reviews/review_form.html'
@@ -31,7 +33,7 @@ class ReviewCreateView(LoginRequiredMixin, CreateView):
         return reverse('restaurants:restaurant_detail', args=[self.object.restaurant_id])
 
 
-class ReviewUpdateView(LoginRequiredMixin, UpdateView):
+class ReviewUpdateView(PaidMemberRequiredMixin, LoginRequiredMixin, UpdateView):
     model = Review
     form_class = ReviewForm
     template_name = 'reviews/review_form.html'
@@ -44,7 +46,7 @@ class ReviewUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('restaurants:restaurant_detail', args=[self.object.restaurant_id])
 
 
-class ReviewDeleteView(LoginRequiredMixin, DeleteView):
+class ReviewDeleteView(PaidMemberRequiredMixin, LoginRequiredMixin, DeleteView):
     model = Review
     template_name = 'reviews/review_confirm_delete.html'
 

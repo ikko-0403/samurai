@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'restaurants',
     'reviews',
     'reservations',
+    'subscriptions',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -139,3 +140,10 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Stripe設定
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PRICE_ID = os.environ.get('STRIPE_PRICE_ID')
+
+

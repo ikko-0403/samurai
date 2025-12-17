@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}予約一覧 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">予約一覧</h2>
+
+        {% if reservations %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>予約日時</th>
+                        <th>店舗名</th>
+                        <th>人数</th>
+                        <th>ステータス</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td>
+                            {{ reservation.reservation_date|date:"Y年n月j日" }}<br>
+                            <small class="text-muted">{{ reservation.reservation_time|time:"H:i" }}</small>
+                        </td>
+                        <td>
+                            <a href="{% url 'restaurants:restaurant_detail' reservation.restaurant.pk %}">
+                                {{ reservation.restaurant.name }}
+                            </a>
+                        </td>
+                        <td>{{ reservation.party_size }}名</td>
+                        <td>
+                            {% if reservation.status == 'confirmed' %}
+                            <span class="badge bg-success">{{ reservation.get_status_display }}</span>
+                            {% elif reservation.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">{{ reservation.get_status_display }}</span>
+                            {% elif reservation.status == 'cancelled' %}
+                            <span class="badge bg-secondary">{{ reservation.get_status_display }}</span>
+                            {% else %}
+                            <span class="badge bg-info">{{ reservation.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.status != 'cancelled' and reservation.status != 'completed' %}
+                            <a href="{% url 'reservations:reservation_edit' reservation.pk %}"
+                                class="btn btn-sm btn-outline-primary me-1">
+                                編集
+                            </a>
+                            <form method="post" action="{% url 'reservations:reservation_cancel' reservation.pk %}"
+                                style="display:inline;" class="cancel-form" data-confirm-message="本当にキャンセルしますか？">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">キャンセル</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if reservation.notes %}
+                    <tr>
+                        <td colspan="5" class="bg-light">
+                            <small><strong>備考:</strong> {{ reservation.notes }}</small>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <nav aria-label="ページネーション">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">前へ</a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">次へ</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-info">
+            <p class="mb-0">予約はまだありません。<a href="{% url 'restaurants:restaurant_list' %}">店舗一覧</a>から予約してみましょう。</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // キャンセルフォームの確認ダイアログ処理
+    document.addEventListener('DOMContentLoaded', function () {
+        const cancelForms = document.querySelectorAll('.cancel-form');
+        cancelForms.forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                const message = this.dataset.confirmMessage || '本当にキャンセルしますか？';
+                if (!confirm(message)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return false;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

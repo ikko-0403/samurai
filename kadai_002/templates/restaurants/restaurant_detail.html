@@ -5,21 +5,19 @@
 <div class="row">
   <div class="col-md-5 mb-3">
     {% if restaurant.image %}
-      <img src="{{ restaurant.image.url }}"
-           alt="{{ restaurant.name }}"
-           class="img-fluid rounded shadow-sm">
+    <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" class="img-fluid rounded shadow-sm">
     {% endif %}
   </div>
 
   <form method="post" action="{% url 'restaurants:favorite_toggle' restaurant.pk %}" class="d-inline">
-  {% csrf_token %}
-  {% if is_favorited %}
+    {% csrf_token %}
+    {% if is_favorited %}
     <button type="submit" class="btn btn-sm btn-outline-danger">★ お気に入り解除</button>
-  {% else %}
+    {% else %}
     <button type="submit" class="btn btn-sm btn-outline-primary">☆ お気に入り</button>
-  {% endif %}
-</form>
-<span class="ms-2 small">お気に入り {{ favorite_count }} 件</span>
+    {% endif %}
+  </form>
+  <span class="ms-2 small">お気に入り {{ favorite_count }} 件</span>
 
 
   <div class="col-md-7">
@@ -29,24 +27,22 @@
     <p class="mb-2">
       <strong>評価：</strong>
       {% with avg_int=avg_rating|floatformat:0 %}
-        <span class="text-warning">
-          {% for _ in "12345" %}
-            {% if forloop.counter <= avg_int %}★{% else %}☆{% endif %}
-          {% endfor %}
-        </span>
-      {% endwith %}
-      <span class="ms-2">({{ avg_rating|floatformat:1 }} / 5, {{ review_count }}件)</span>
+      <span class="text-warning">
+        {% for _ in "12345" %}
+        {% if forloop.counter <= avg_int %}★{% else %}☆{% endif %} {% endfor %} </span>
+          {% endwith %}
+          <span class="ms-2">({{ avg_rating|floatformat:1 }} / 5, {{ review_count }}件)</span>
     </p>
 
     {% if user.is_authenticated %}
-      {% if my_review %}
-        <a class="btn btn-sm btn-outline-primary" href="{% url 'reviews:review_edit' my_review.pk %}">自分のレビューを編集</a>
-        <a class="btn btn-sm btn-outline-danger" href="{% url 'reviews:review_delete' my_review.pk %}">削除</a>
-      {% else %}
-        <a class="btn btn-sm btn-primary" href="{% url 'reviews:review_create' restaurant.pk %}">レビューを書く</a>
-      {% endif %}
+    {% if my_review %}
+    <a class="btn btn-sm btn-outline-primary" href="{% url 'reviews:review_edit' my_review.pk %}">自分のレビューを編集</a>
+    <a class="btn btn-sm btn-outline-danger" href="{% url 'reviews:review_delete' my_review.pk %}">削除</a>
     {% else %}
-      <a class="btn btn-sm btn-primary" href="{% url 'accounts:login' %}?next={{ request.path }}">ログインしてレビューを書く</a>
+    <a class="btn btn-sm btn-primary" href="{% url 'reviews:review_create' restaurant.pk %}">レビューを書く</a>
+    {% endif %}
+    {% else %}
+    <a class="btn btn-sm btn-primary" href="{% url 'accounts:login' %}?next={{ request.path }}">ログインしてレビューを書く</a>
     {% endif %}
 
     <hr class="my-3">
@@ -78,31 +74,50 @@
       </tbody>
     </table>
 
-    <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary btn-sm">
-      ← 一覧に戻る
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary btn-sm">
+        ← 一覧に戻る
+      </a>
+
+      {% if user.is_authenticated and user.is_owner_member and restaurant.company == user.company %}
+      <a href="{% url 'restaurants:owner_restaurant_update' restaurant.pk %}" class="btn btn-warning btn-sm">
+        <i class="bi bi-pencil"></i> 編集
+      </a>
+      <a href="{% url 'restaurants:owner_restaurant_delete' restaurant.pk %}" class="btn btn-danger btn-sm">
+        <i class="bi bi-trash"></i> 削除
+      </a>
+      {% endif %}
+
+      {% if user.is_authenticated and not user.is_owner_member %}
+      <a href="{% url 'reservations:reservation_create' restaurant.pk %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-calendar-check"></i> 予約する
+      </a>
+      {% elif not user.is_authenticated %}
+      <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-calendar-check"></i> ログインして予約する
+      </a>
+      {% endif %}
+    </div>
   </div>
 </div>
 
 <h3 class="h5 mt-4">最新のレビュー</h3>
 {% if recent_reviews %}
-  <ul class="list-unstyled">
-    {% for rv in recent_reviews %}
-      <li class="mb-3">
-        <div class="small text-muted">
-          {{ rv.user.name|default:rv.user.email }} / {{ rv.created_at|date:"Y-m-d" }}
-        </div>
-        <div class="text-warning">
-          {% for _ in "12345" %}
-            {% if forloop.counter <= rv.rating %}★{% else %}☆{% endif %}
-          {% endfor %}
-        </div>
+<ul class="list-unstyled">
+  {% for rv in recent_reviews %}
+  <li class="mb-3">
+    <div class="small text-muted">
+      {{ rv.user.name|default:rv.user.email }} / {{ rv.created_at|date:"Y-m-d" }}
+    </div>
+    <div class="text-warning">
+      {% for _ in "12345" %}
+      {% if forloop.counter <= rv.rating %}★{% else %}☆{% endif %} {% endfor %} </div>
         {% if rv.title %}<strong>{{ rv.title }}</strong><br>{% endif %}
         <div>{{ rv.comment|linebreaksbr }}</div>
-      </li>
-    {% endfor %}
-  </ul>
+  </li>
+  {% endfor %}
+</ul>
 {% else %}
-  <p>まだレビューはありません。</p>
+<p>まだレビューはありません。</p>
 {% endif %}
 {% endblock %}

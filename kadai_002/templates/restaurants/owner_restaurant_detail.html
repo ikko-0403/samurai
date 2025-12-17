@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ restaurant.name }}（管理） | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">店舗詳細（管理）</h1>
+    <a href="{% url 'restaurants:owner_restaurant_list' %}" class="btn btn-outline-secondary">
+        ← 店舗一覧に戻る
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            {% if restaurant.image %}
+            <div class="col-md-4 mb-3">
+                <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" class="img-fluid rounded shadow-sm">
+            </div>
+            {% endif %}
+
+            <div class="{% if restaurant.image %}col-md-8{% else %}col-12{% endif %}">
+                <h2 class="h4 mb-3">{{ restaurant.name }}</h2>
+
+                <table class="table table-sm table-bordered">
+                    <tbody>
+                        <tr>
+                            <th style="width: 150px;" class="bg-light">ID</th>
+                            <td>{{ restaurant.id }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">会社</th>
+                            <td>{{ restaurant.company.name }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">カテゴリ</th>
+                            <td>{{ restaurant.category.name }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">住所</th>
+                            <td>{{ restaurant.address }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">電話番号</th>
+                            <td>{{ restaurant.tel }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">営業時間</th>
+                            <td>{{ restaurant.open_time }}〜{{ restaurant.close_time }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">定休日</th>
+                            <td>{{ restaurant.holiday }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">価格帯</th>
+                            <td>¥{{ restaurant.price_min }}〜¥{{ restaurant.price_max }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">座席数</th>
+                            <td>{{ restaurant.seats }}席</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">説明</th>
+                            <td>{{ restaurant.description|linebreaksbr }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-flex gap-2 mt-3">
+                    <a href="{% url 'restaurants:owner_restaurant_update' restaurant.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> 編集
+                    </a>
+                    <a href="{% url 'restaurants:owner_restaurant_delete' restaurant.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> 削除
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

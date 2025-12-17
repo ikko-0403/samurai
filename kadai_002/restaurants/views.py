@@ -7,8 +7,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.contrib.auth import get_user_model
+from django.contrib import messages
 from .models import Restaurant, Category, Favorite, Company
 from .forms import CompanyForm, CategoryForm, OwnerRestaurantForm, OwnerMemberCreateForm
+from accounts.mixins import PaidMemberRequiredMixin
 import csv
 import urllib.parse
 from django.http import HttpResponse
@@ -60,6 +62,11 @@ class RestaurantListView(ListView):
         if category_name:
             qs = qs.filter(category__name=category_name)
 
+        # --- 店舗名で検索 ---
+        keyword = self.request.GET.get('keyword')
+        if keyword:
+            qs = qs.filter(name__icontains=keyword)
+
         # いつでもお気に入り件数を付ける
         qs = qs.annotate(
             favorite_count=Count('favorites', distinct=True)
@@ -76,6 +83,18 @@ class RestaurantListView(ListView):
                 )
             )
 
+        # --- 並び替え機能 ---
+        sort_by = self.request.GET.get('sort', 'default')
+        if sort_by == 'price_low':
+            # 価格が安い順
+            qs = qs.order_by('price_min', 'id')
+        elif sort_by == 'price_high':
+            # 価格が高い順
+            qs = qs.order_by('-price_max', '-id')
+        else:
+            # デフォルト：新しい順
+            qs = qs.order_by('-id')
+
         return qs
     
     def get_context_data(self, **kwargs):
@@ -86,6 +105,8 @@ class RestaurantListView(ListView):
         
         ctx["categories"] = Category.objects.all() # ID検索用（念のため残す）
         ctx["current_category_id"] = self.request.GET.get("category")
+        ctx["keyword"] = self.request.GET.get("keyword", "")
+        ctx["sort"] = self.request.GET.get("sort", "default")
         return ctx
 
 
@@ -110,7 +131,7 @@ class RestaurantDetailView(DetailView):
         return ctx
 
     
-class MyFavoriteListView(LoginRequiredMixin, ListView):
+class MyFavoriteListView(PaidMemberRequiredMixin, LoginRequiredMixin, ListView):
     template_name = "restaurants/my_favorite_list.html"
     context_object_name = "restaurants"
 
@@ -125,6 +146,14 @@ class MyFavoriteListView(LoginRequiredMixin, ListView):
 
 @login_required
 def favorite_toggle(request, restaurant_pk):
+    # 有料会員チェック
+    if not request.user.is_paid_member:
+        messages.warning(
+            request,
+            'お気に入り機能は有料プラン会員限定です。有料プランに登録してご利用ください。'
+        )
+        return redirect('accounts:payment_method')
+    
     restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
     fav, created = Favorite.objects.get_or_create(
         user=request.user,
@@ -206,7 +235,6 @@ class OwnerDashboardView(OwnerRequiredMixin, TemplateView):
         ctx = super().get_context_data(**kwargs)
         return ctx
     
-# ▼▼▼ 修正2: ここにあった class OwnerRestaurantForm を削除したぞな！ ▼▼▼
 
 # オーナーが新しい店舗を作成するビュー
 class OwnerRestaurantCreateView(LoginRequiredMixin, OwnerRequiredMixin, CreateView):
@@ -277,7 +305,6 @@ class OwnerRestaurantUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateV
         return reverse_lazy("restaurants:owner_dashboard")
 
 
-# views.py
 
 class OwnerRestaurantDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Restaurant
@@ -293,6 +320,21 @@ class OwnerRestaurantDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteV
                 and hasattr(user, "company")
                 and restaurant.company == user.company)
 
+
+# オーナー用店舗詳細ビュー
+class OwnerRestaurantDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Restaurant
+    template_name = "restaurants/owner_restaurant_detail.html"
+    context_object_name = "restaurant"
+
+    # 権限チェック（自社の店舗のみ閲覧可能）
+    def test_func(self):
+        restaurant = self.get_object()
+        user = self.request.user
+        return (user.is_authenticated 
+                and getattr(user, "is_owner_member", False)
+                and hasattr(user, "company")
+                and restaurant.company == user.company)
 
 
 class OwnerCategoryMixin(UserPassesTestMixin):
@@ -355,9 +397,13 @@ class OwnerMemberListView(LoginRequiredMixin, OwnerRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # 1. 【変更】絞り込みなしで全ユーザーを取得
-        # ただし、会社名を表示するなら select_related は必須（高速化のため）
-        qs = User.objects.all().select_related('company')
+        # 1. 一般ユーザーのみ取得（オーナー・管理者・スタッフは除外）
+        # 会社名を表示するなら select_related は必須（高速化のため）
+        qs = User.objects.filter(
+            is_owner_member=False,
+            is_staff=False,
+            is_superuser=False
+        ).select_related('company')
 
         # 2. 検索機能
         keyword = self.request.GET.get('keyword')
@@ -391,24 +437,29 @@ class OwnerMemberDetailView(LoginRequiredMixin, OwnerRequiredMixin, DetailView):
 # 1. 店舗一覧CSV出力
 class OwnerRestaurantCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        # レスポンスの設定 (文字コードはcp932=Shift_JIS)
-        # ※注意：cp932は一部の特殊文字（ハシゴ高など）でエラーになる可能性があるけん、
-        # もしエラーが出たら 'utf-8-sig' に戻すのが無難よ。
-        response = HttpResponse(content_type='text/csv; charset=cp932')
-        filename = urllib.parse.quote("店舗一覧.csv")
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        # レスポンスの設定
+        response = HttpResponse(content_type='text/csv')
+        response.charset = 'utf-8'
+        filename_ascii = "restaurant_list.csv"
+        filename_utf8 = "店舗一覧.csv"
+        response['Content-Disposition'] = 'attachment; filename="{}"; filename*=UTF-8\'\'{}'.format(
+            filename_ascii, urllib.parse.quote(filename_utf8)
+        )
 
+        # UTF-8 BOMを追加（Excelで正しく開くため）
+        response.write('\ufeff')
+        
         writer = csv.writer(response)
         # ヘッダー行
         writer.writerow(['ID', '店舗名', 'カテゴリ', '住所', '電話番号'])
 
         # 1. まずは自分の会社の店舗に絞り込み
-        if hasattr(request.user, 'company'):
-            restaurants = Restaurant.objects.filter(company=request.user.company)
+        if hasattr(request.user, 'company') and request.user.company:
+            restaurants = Restaurant.objects.filter(company=request.user.company).select_related('category')
         else:
-            return response # 会社がない場合は空で返す
+            return response  # 会社がない場合は空で返す
 
-        # 2. 【ここを追加】検索条件があればさらに絞り込む
+        # 2. 検索条件があればさらに絞り込む
         keyword = request.GET.get('keyword')
         if keyword:
             # 店舗名にキーワードが含まれるか
@@ -434,10 +485,15 @@ class OwnerRestaurantCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
 # 2. カテゴリ一覧CSV出力
 class OwnerCategoryCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        response = HttpResponse(content_type='text/csv; charset=cp932')
-        filename = urllib.parse.quote("カテゴリ一覧.csv")
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response = HttpResponse(content_type='text/csv')
+        response.charset = 'utf-8'
+        filename_ascii = "category_list.csv"
+        filename_utf8 = "カテゴリ一覧.csv"
+        response['Content-Disposition'] = 'attachment; filename="{}"; filename*=UTF-8\'\'{}'.format(filename_ascii, urllib.parse.quote(filename_utf8))
 
+        # UTF-8 BOMを追加（Excelで正しく開くため）
+        response.write('\ufeff')
+        
         writer = csv.writer(response)
         writer.writerow(['ID', 'カテゴリ名', '有効フラグ'])
 
@@ -456,12 +512,22 @@ class OwnerCategoryCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
 # 3. 会員一覧CSV出力
 class OwnerMemberCSVView(LoginRequiredMixin, OwnerRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
-        filename = urllib.parse.quote("会員一覧.csv")
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response = HttpResponse(content_type='text/csv')
+        response.charset = 'utf-8'
+        filename_ascii = "member_list.csv"
+        filename_utf8 = "会員一覧.csv"
+        response['Content-Disposition'] = 'attachment; filename="{}"; filename*=UTF-8\'\'{}'.format(filename_ascii, urllib.parse.quote(filename_utf8))
+        
+        # UTF-8 BOMを追加（Excelで正しく開くため）
+        response.write('\ufeff')
+        
         writer = csv.writer(response)
         writer.writerow(['ID', '名前', 'メールアドレス', '登録日'])
-        members = User.objects.all().order_by('-date_joined')
+        members = User.objects.filter(
+            is_owner_member=False,
+            is_staff=False,
+            is_superuser=False
+        ).order_by('-date_joined')
         query = request.GET.get('keyword') 
 
         if query:

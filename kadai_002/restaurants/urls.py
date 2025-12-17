@@ -19,6 +19,7 @@ urlpatterns = [
     # --- オーナー管理画面：店舗管理 ---
     path("owner/restaurants/", views.OwnerRestaurantListView.as_view(), name="owner_restaurant_list"),
     path("owner/restaurants/create/", views.OwnerRestaurantCreateView.as_view(), name="owner_restaurant_create"), # 新規作成
+    path("owner/restaurants/<int:pk>/", views.OwnerRestaurantDetailView.as_view(), name="owner_restaurant_detail"), # 詳細
     path("owner/restaurants/<int:pk>/update/", views.OwnerRestaurantUpdateView.as_view(), name="owner_restaurant_update"), # 編集
     path("owner/restaurants/<int:pk>/delete/", views.OwnerRestaurantDeleteView.as_view(), name="owner_restaurant_delete"), # 削除
 

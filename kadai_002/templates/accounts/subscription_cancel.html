@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}有料プラン解約 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">有料プラン解約</h2>
+
+        {% if user.is_paid_member %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>ご確認ください</strong>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">解約について</h5>
+                <p>有料プランを解約すると、以下の特典がご利用いただけなくなります：</p>
+                <ul>
+                    <li>レビュー投稿（5段階評価）</li>
+                    <li>店舗のお気に入り登録</li>
+                    <li>お気に入り一覧の表示</li>
+                    <li>クレジットカード情報の管理</li>
+                </ul>
+
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i>
+                    解約後も、次回請求日まではプレミアム特典をご利用いただけます。
+                </div>
+
+                <p class="text-muted small">
+                    ※解約はいつでも可能で、解約手数料などは一切かかりません。
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title text-danger">解約の確認</h5>
+                <p>本当に有料プランを解約してもよろしいですか？</p>
+
+                <form method="post" action="{% url 'subscriptions:cancel' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> 解約する
+                    </button>
+                    <a href="{% url 'accounts:payment_method' %}" class="btn btn-secondary ms-2">
+                        <i class="bi bi-arrow-left"></i> キャンセル
+                    </a>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            現在、無料会員としてご利用中です。
+        </div>
+        <a href="{% url 'accounts:payment_method' %}" class="btn btn-primary">
+            <i class="bi bi-arrow-left"></i> お支払い方法ページへ戻る
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}決済完了 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+            </div>
+
+            <h2 class="mb-3">有料プラン登録が完了しました！</h2>
+            <p class="lead">プレミアム会員へのご登録、ありがとうございます。</p>
+
+            <div class="card my-4">
+                <div class="card-body">
+                    <h5 class="card-title">ご利用いただける特典</h5>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> レビュー投稿（5段階評価）</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> 店舗のお気に入り登録</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> お気に入り一覧の表示</li>
+                        <li class="mb-2"><i class="bi bi-check-circle text-success"></i> クレジットカード情報の管理</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                サブスクリプション情報は「お支払い方法」ページでご確認いただけます。
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'accounts:mypage' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-person-circle"></i> マイページへ
+                </a>
+                <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-shop"></i> 店舗一覧へ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

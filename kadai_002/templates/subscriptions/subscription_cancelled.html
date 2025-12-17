@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}決済キャンセル | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-x-circle-fill text-warning" style="font-size: 5rem;"></i>
+            </div>
+
+            <h2 class="mb-3">決済がキャンセルされました</h2>
+            <p class="lead">有料プランへの登録は完了していません。</p>
+
+            <div class="card my-4">
+                <div class="card-body">
+                    <p>
+                        決済画面でキャンセルされたため、有料プランへの登録は行われませんでした。
+                        再度登録をご希望の場合は、下記ボタンからお手続きください。
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'accounts:payment_method' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-arrow-left"></i> お支払い方法ページへ戻る
+                </a>
+                <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-shop"></i> 店舗一覧へ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
