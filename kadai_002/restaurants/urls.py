@@ -8,6 +8,7 @@ app_name = 'restaurants'
 urlpatterns = [
     # --- 一般ユーザー向け ---
     path("", views.TopRedirectView.as_view(), name="top"),
+    path("prefectures/", views.PrefectureSelectView.as_view(), name="prefecture_select"),
     path("restaurants/", views.RestaurantListView.as_view(), name="restaurant_list"),
     path('<int:pk>/', views.RestaurantDetailView.as_view(), name='restaurant_detail'),
     path('favorites/', views.MyFavoriteListView.as_view(), name='my_favorite_list'),

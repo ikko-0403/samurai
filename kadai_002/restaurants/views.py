@@ -31,7 +31,25 @@ class TopRedirectView(View):
             return redirect('restaurants:owner_dashboard')
 
         # 一般ユーザーは店舗一覧へ
-        return redirect('restaurants:restaurant_list')
+        return redirect('restaurants:prefecture_select')
+
+
+class PrefectureSelectView(TemplateView):
+    """都道府県選択画面"""
+    template_name = 'restaurants/prefecture_select.html'
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        
+        # データベースから都道府県のリストと店舗数を取得
+        from django.db.models import Count
+        prefectures = (Restaurant.objects
+                      .values('prefecture')
+                      .annotate(restaurant_count=Count('id'))
+                      .order_by('prefecture'))
+        
+        ctx['prefectures'] = prefectures
+        return ctx
 
 
 class RestaurantListView(ListView):
@@ -61,6 +79,11 @@ class RestaurantListView(ListView):
         category_name = self.request.GET.get('category_name')
         if category_name:
             qs = qs.filter(category__name=category_name)
+
+        # --- 都道府県で絞り込み ---
+        prefecture = self.request.GET.get('prefecture')
+        if prefecture:
+            qs = qs.filter(prefecture=prefecture)
 
         # --- 店舗名で検索 ---
         keyword = self.request.GET.get('keyword')
@@ -107,6 +130,7 @@ class RestaurantListView(ListView):
         ctx["current_category_id"] = self.request.GET.get("category")
         ctx["keyword"] = self.request.GET.get("keyword", "")
         ctx["sort"] = self.request.GET.get("sort", "default")
+        ctx["prefecture"] = self.request.GET.get("prefecture", "")
         return ctx
 
 

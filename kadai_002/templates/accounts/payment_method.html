@@ -51,6 +51,20 @@
 
                 <hr>
 
+                <h6 class="mb-3">クレジットカード情報</h6>
+                <form method="post" action="{% url 'subscriptions:customer_portal' %}" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-credit-card"></i> クレジットカード情報を管理
+                    </button>
+                </form>
+
+                <p class="small text-muted mb-3">
+                    ※クレジットカードの登録・変更・削除ができます
+                </p>
+
+                <hr>
+
                 <a href="{% url 'accounts:subscription_cancel' %}" class="btn btn-outline-danger">
                     <i class="bi bi-x-circle"></i> 有料プランを解約
                 </a>

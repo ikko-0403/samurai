@@ -157,3 +157,37 @@ class SubscriptionCancelView(LoginRequiredMixin, View):
             messages.error(request, f'解約処理でエラーが発生しました: {str(e)}')
         
         return redirect('accounts:payment_method')
+
+
+class CustomerPortalView(LoginRequiredMixin, View):
+    """Stripeカスタマーポータルへのリダイレクト"""
+    
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        
+        if not user.is_paid_member:
+            messages.warning(request, '有料会員のみご利用いただけます。')
+            return redirect('accounts:payment_method')
+        
+        try:
+            # ユーザーのサブスクリプション情報を取得
+            subscription_obj = Subscription.objects.get(user=user)
+            
+            if not subscription_obj.stripe_customer_id:
+                messages.error(request, 'Stripe顧客情報が見つかりません。')
+                return redirect('accounts:payment_method')
+            
+            # Stripeカスタマーポータルセッションを作成
+            session = stripe.billing_portal.Session.create(
+                customer=subscription_obj.stripe_customer_id,
+                return_url=request.build_absolute_uri(reverse('accounts:payment_method')),
+            )
+            
+            return redirect(session.url)
+            
+        except Subscription.DoesNotExist:
+            messages.error(request, 'サブスクリプション情報が見つかりません。')
+            return redirect('accounts:payment_method')
+        except Exception as e:
+            messages.error(request, f'カスタマーポータルの作成中にエラーが発生しました: {str(e)}')
+            return redirect('accounts:payment_method')

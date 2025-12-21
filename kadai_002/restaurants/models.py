@@ -67,6 +67,7 @@ class Restaurant(models.Model):
     price_max = models.IntegerField()
     open_time = models.TimeField()
     close_time = models.TimeField()
+    prefecture = models.CharField('都道府県', max_length=10, default='愛知県')
     zipcode = models.CharField(max_length=10)
     address = models.CharField(max_length=200)
     tel = models.CharField(max_length=20)

@@ -2,10 +2,25 @@
 {% block title %}店舗一覧 | NAGOYAMESHI{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">店舗一覧</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="mb-0">
+    {% if prefecture %}
+    {{ prefecture }} の店舗一覧
+    {% else %}
+    店舗一覧
+    {% endif %}
+  </h1>
+  <a href="{% url 'restaurants:prefecture_select' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i> 都道府県選択に戻る
+  </a>
+</div>
 
 <!-- ▼ 検索・絞り込み・並び替えフォーム ▼ -->
 <form method="get" class="row g-2 mb-4">
+  <!-- 都道府県を保持 -->
+  {% if prefecture %}
+  <input type="hidden" name="prefecture" value="{{ prefecture }}">
+  {% endif %}
 
   <!-- 店舗名検索 -->
   <div class="col-md-3">
@@ -19,7 +34,7 @@
     <select name="category_name" class="form-select">
       <option value="">すべて</option>
       {% for category_name in category_names %}
-      <option value="{{ category_name }}" {% if category_name == request.GET.category_name %}selected{% endif %}>
+      <option value="{{ category_name }}" {% if category_name==request.GET.category_name %}selected{% endif %}>
         {{ category_name }}
       </option>
       {% endfor %}
@@ -30,15 +45,15 @@
   <div class="col-md-3">
     <label class="form-label">並び替え</label>
     <select name="sort" class="form-select">
-      <option value="default" {% if sort == "default" %}selected{% endif %}>新しい順</option>
-      <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>価格が安い順</option>
-      <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>価格が高い順</option>
+      <option value="default" {% if sort=="default" %}selected{% endif %}>新しい順</option>
+      <option value="price_low" {% if sort=="price_low" %}selected{% endif %}>価格が安い順</option>
+      <option value="price_high" {% if sort=="price_high" %}selected{% endif %}>価格が高い順</option>
     </select>
   </div>
 
   <div class="col-md-3 d-flex align-items-end">
     <button type="submit" class="btn btn-primary me-2">検索</button>
-    <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">
+    <a href="{% url 'restaurants:prefecture_select' %}" class="btn btn-outline-secondary">
       クリア
     </a>
   </div>

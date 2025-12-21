@@ -8,4 +8,5 @@ urlpatterns = [
     path('success/', views.SubscriptionSuccessView.as_view(), name='success'),
     path('cancelled/', views.SubscriptionCancelledView.as_view(), name='cancelled'),
     path('cancel/', views.SubscriptionCancelView.as_view(), name='cancel'),
+    path('customer-portal/', views.CustomerPortalView.as_view(), name='customer_portal'),
 ]
