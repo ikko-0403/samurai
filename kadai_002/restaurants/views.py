@@ -1,7 +1,7 @@
 from django import forms
 from django.views.generic import View, ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.utils.decorators import method_decorator
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -13,7 +13,7 @@ from .forms import CompanyForm, CategoryForm, OwnerRestaurantForm, OwnerMemberCr
 from accounts.mixins import PaidMemberRequiredMixin
 import csv
 import urllib.parse
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 
 
@@ -31,25 +31,7 @@ class TopRedirectView(View):
             return redirect('restaurants:owner_dashboard')
 
         # 一般ユーザーは店舗一覧へ
-        return redirect('restaurants:prefecture_select')
-
-
-class PrefectureSelectView(TemplateView):
-    """都道府県選択画面"""
-    template_name = 'restaurants/prefecture_select.html'
-    
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        
-        # データベースから都道府県のリストと店舗数を取得
-        from django.db.models import Count
-        prefectures = (Restaurant.objects
-                      .values('prefecture')
-                      .annotate(restaurant_count=Count('id'))
-                      .order_by('prefecture'))
-        
-        ctx['prefectures'] = prefectures
-        return ctx
+        return redirect('restaurants:restaurant_list')
 
 
 class RestaurantListView(ListView):
@@ -62,9 +44,19 @@ class RestaurantListView(ListView):
         # 関連も一緒に取ってくる
         qs = (super().get_queryset()
               .select_related('category', 'company'))
+        
+        # 検索パラメータの取得
+        keyword = self.request.GET.get('keyword')
+        category_name = self.request.GET.get('category_name')
+        prefecture = self.request.GET.get('prefecture')
+        city = self.request.GET.get('city')
+        category_id = self.request.GET.get('category')
+        
+        # 何も検索していない場合は空のクエリセットを返す
+        if not any([keyword, category_name, prefecture, city, category_id]):
+            return qs.none()
 
         # ?category=1 みたいな値を取得して絞り込み
-        category_id = self.request.GET.get('category')
         if category_id:
             qs = qs.filter(category_id=category_id)
 
@@ -84,6 +76,11 @@ class RestaurantListView(ListView):
         prefecture = self.request.GET.get('prefecture')
         if prefecture:
             qs = qs.filter(prefecture=prefecture)
+
+        # --- 市区町村で絞り込み ---
+        city = self.request.GET.get('city')
+        if city:
+            qs = qs.filter(city__icontains=city)
 
         # --- 店舗名で検索 ---
         keyword = self.request.GET.get('keyword')
@@ -126,11 +123,24 @@ class RestaurantListView(ListView):
         all_categories = Category.objects.filter(is_active=True).values_list('name', flat=True)
         ctx["category_names"] = sorted(list(set(all_categories)))
         
+        # 全国47都道府県のリスト
+        ctx["prefectures"] = [
+            '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+            '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+            '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県',
+            '岐阜県', '静岡県', '愛知県', '三重県',
+            '滋賀県', '京都府', '大阪府', '兵庫県', '奈良県', '和歌山県',
+            '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+            '徳島県', '香川県', '愛媛県', '高知県',
+            '福岡県', '佐賀県', '長崎県', '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
+        ]
+        
         ctx["categories"] = Category.objects.all() # ID検索用（念のため残す）
         ctx["current_category_id"] = self.request.GET.get("category")
         ctx["keyword"] = self.request.GET.get("keyword", "")
         ctx["sort"] = self.request.GET.get("sort", "default")
         ctx["prefecture"] = self.request.GET.get("prefecture", "")
+        ctx["city"] = self.request.GET.get("city", "")
         return ctx
 
 
@@ -147,6 +157,10 @@ class RestaurantDetailView(DetailView):
         ctx['avg_rating'] = agg['avg'] or 0
         ctx['review_count'] = agg['cnt'] or 0
         ctx['recent_reviews'] = r.reviews.select_related('user')[:3]
+        
+        # お気に入り件数を追加
+        ctx['favorite_count'] = r.favorites.count()
+        
         if self.request.user.is_authenticated:
             ctx['my_review'] = r.reviews.filter(user=self.request.user).first()
             ctx["is_favorited"] = Favorite.objects.filter(user=self.request.user, restaurant=r).exists()
@@ -299,6 +313,7 @@ class OwnerRestaurantCreateView(LoginRequiredMixin, OwnerRequiredMixin, CreateVi
     def form_valid(self, form):
         if hasattr(self.request.user, 'company'):
              form.instance.company = self.request.user.company
+        messages.success(self.request, '店舗を登録しました。')
         return super().form_valid(form)    
 
 class OwnerCompanyDetailView(LoginRequiredMixin, OwnerRequiredMixin, TemplateView):
@@ -350,6 +365,10 @@ class OwnerRestaurantUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateV
     
     def get_success_url(self):
         return reverse_lazy("restaurants:owner_dashboard")
+    
+    def form_valid(self, form):
+        messages.success(self.request, '店舗情報を更新しました。')
+        return super().form_valid(form)
 
 
 
@@ -366,6 +385,10 @@ class OwnerRestaurantDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteV
                 and getattr(user, "is_owner_member", False)
                 and hasattr(user, "company")
                 and restaurant.company == user.company)
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, '店舗を削除しました。')
+        return super().delete(request, *args, **kwargs)
 
 
 # オーナー用店舗詳細ビュー
@@ -415,6 +438,7 @@ class OwnerCategoryCreateView(OwnerCategoryMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.company = self.request.user.company
+        messages.success(self.request, 'カテゴリを登録しました。')
         return super().form_valid(form)
 
 # カテゴリ編集
@@ -423,6 +447,10 @@ class OwnerCategoryUpdateView(OwnerCategoryMixin, UpdateView):
     form_class = CategoryForm
     template_name = "restaurants/owner_category_form.html"
     success_url = reverse_lazy("restaurants:owner_category_list")
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'カテゴリ情報を更新しました。')
+        return super().form_valid(form)
 
 
 # カテゴリ削除
@@ -432,6 +460,7 @@ class OwnerCategoryDeleteView(OwnerCategoryMixin, DeleteView):
     success_url = reverse_lazy("restaurants:owner_category_list")
     
     def delete(self, request, *args, **kwargs):
+        messages.success(request, 'カテゴリを削除しました。')
         return super().delete(request, *args, **kwargs)
 
 
@@ -611,4 +640,14 @@ class OwnerMemberCreateView(LoginRequiredMixin, OwnerRequiredMixin, CreateView):
             new_user.company = self.request.user.company
             
         new_user.save()
+        messages.success(self.request, 'オーナーメンバーを作成しました。')
         return super().form_valid(form)
+
+
+def get_cities_by_prefecture(request):
+    """都道府県に対応する市区町村リストを返すAPI"""
+    prefecture = request.GET.get('prefecture', '')
+    if prefecture:
+        cities = Restaurant.objects.filter(prefecture=prefecture).values_list('city', flat=True).distinct().order_by('city')
+        return JsonResponse({'cities': list(cities)})
+    return JsonResponse({'cities': []})

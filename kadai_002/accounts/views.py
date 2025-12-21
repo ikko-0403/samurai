@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView, ListView, DetailView, UpdateView
+from django.contrib import messages
 from .models import User
 from .forms import SignUpForm, UserProfileForm
 
@@ -18,6 +19,10 @@ class CustomLoginView(LoginView):
 
         # それ以外（普通の会員）は店舗一覧へ
         return reverse_lazy("restaurants:restaurant_list")
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'ログインしました。')
+        return super().form_valid(form)
 
 
 
@@ -27,6 +32,10 @@ class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = 'accounts/signup.html'
     success_url = reverse_lazy('accounts:login')  # 登録後はログイン画面へ
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'アカウントを作成しました。ログインしてください。')
+        return super().form_valid(form)
 
 
 class MyPageView(LoginRequiredMixin, TemplateView):

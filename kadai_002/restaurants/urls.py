@@ -8,11 +8,13 @@ app_name = 'restaurants'
 urlpatterns = [
     # --- 一般ユーザー向け ---
     path("", views.TopRedirectView.as_view(), name="top"),
-    path("prefectures/", views.PrefectureSelectView.as_view(), name="prefecture_select"),
     path("restaurants/", views.RestaurantListView.as_view(), name="restaurant_list"),
     path('<int:pk>/', views.RestaurantDetailView.as_view(), name='restaurant_detail'),
     path('favorites/', views.MyFavoriteListView.as_view(), name='my_favorite_list'),
     path('favorite/<int:restaurant_pk>/', views.favorite_toggle, name='favorite_toggle'),
+    
+    # --- API ---
+    path('api/cities/', views.get_cities_by_prefecture, name='get_cities'),
 
     # --- オーナー管理画面：ダッシュボード ---
     path("owner/dashboard/", views.OwnerDashboardView.as_view(), name="owner_dashboard"),

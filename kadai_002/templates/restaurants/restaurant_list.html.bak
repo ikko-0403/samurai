@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}店舗一覧 | NAGOYAMESHI{% endblock %}
+
+{% block content %}
+\u003ch1 class=\"mb-4 text-center\"\u003e🍽️ NAGOYAMESHI\u003c/h1\u003e
+
+\u003c!-- ▼ 検索フォーム ▼ --\u003e
+\u003cdiv class=\"search-container\"\u003e
+\u003c!-- 検索前または検索後で表示を変える --\u003e
+{% if request.GET %}
+\u003c!-- 検索後：コンパクトなフォーム --\u003e
+\u003cform method=\"get\" class=\"row g-2 mb-4\"\u003e
+{% else %}
+\u003c!-- 検索前：大きな検索フォーム --\u003e
+\u003cform method=\"get\" class=\"search-form-large mb-5\"\u003e
+\u003ch3 class=\"text-center mb-4\"\u003eお店を検索\u003c/h3\u003e
+{% endif %}
+
+\u003cdiv class=\"{% if request.GET %}col-md-2{% else %}search-field{% endif %}\"\u003e
+\u003clabel class=\"form-label\"\u003e都道府県\u003c/label\u003e
+\u003cselect name=\"prefecture\" class=\"form-select\" id=\"prefectureSelect\"\u003e
+<option value="">すべて</option>
+{% for pref in prefectures %}
+\u003coption value=\"{{ pref }}\" {% if pref == prefecture %}selected{% endif %}\u003e{{ pref }}\u003c/option\u003e
+{% endfor %}
+\u003c/select\u003e
+\u003c/div\u003e
+
+\u003cdiv class=\"{% if request.GET %}col-md-2{% else %}search-field{% endif %}\"\u003e
+\u003clabel class=\"form-label\"\u003e市区町村\u003c/label\u003e
+\u003cselect name=\"city\" id=\"citySelect\" class=\"form-select\"\u003e
+\u003coption value=\"\"\u003eすべて\u003c/option\u003e
+{% if city %}
+\u003coption value=\"{{ city }}\" selected\u003e{{ city }}\u003c/option\u003e
+{% endif %}
+\u003c/select\u003e
+\u003c/div\u003e
+
+\u003cdiv class=\"{% if request.GET %}col-md-2{% else %}search-field{% endif %}\"\u003e
+\u003clabel class=\"form-label\"\u003eカテゴリ\u003c/label\u003e
+\u003cselect name=\"category_name\" class=\"form-select\"\u003e
+\u003coption value=\"\"\u003eすべて\u003c/option\u003e
+{% for category_name in category_names %}
+\u003coption value=\"{{ category_name }}\" {% if category_name == request.GET.category_name %}selected{% endif %}\u003e
+{{ category_name }}
+\u003c/option\u003e
+{% endfor %}
+\u003c/select\u003e
+\u003c/div\u003e
+
+\u003cdiv class=\"{% if request.GET %}col-md-2{% else %}search-field{% endif %}\"\u003e
+\u003clabel class=\"form-label\"\u003e店舗名\u003c/label\u003e
+\u003cinput type=\"text\" name=\"keyword\" class=\"form-control\" placeholder=\"キーワードで検索\" value=\"{{ keyword }}\"\u003e
+\u003c/div\u003e
+
+{% if request.GET %}
+\u003cdiv class=\"col-md-2\"\u003e
+\u003clabel class=\"form-label\"\u003e並び替え\u003c/label\u003e
+\u003cselect name=\"sort\" class=\"form-select\"\u003e
+\u003coption value=\"default\" {% if sort == \"default\" %}selected{% endif %}\u003e新しい順\u003c/option\u003e
+\u003coption value=\"price_low\" {% if sort == \"price_low\" %}selected{% endif %}\u003e価格が安い順\u003c/option\u003e
+\u003coption value=\"price_high\" {% if sort == \"price_high\" %}selected{% endif %}\u003e価格が高い順\u003c/option\u003e
+\u003c/select\u003e
+\u003c/div\u003e
+{% endif %}
+
+\u003cdiv class=\"{% if request.GET %}col-md-2 d-flex align-items-end{% else %}search-buttons{% endif %}\"\u003e
+\u003cbutton type=\"submit\" class=\"btn btn-primary {% if not request.GET %}btn-lg w-100{% else %}me-2{% endif
+%}\"\u003e🔍 検索\u003c/button\u003e
+{% if request.GET %}
+\u003ca href=\"{% url 'restaurants:restaurant_list' %}\" class=\"btn btn-outline-secondary\"\u003eクリア\u003c/a\u003e
+{% endif %}
+\u003c/div\u003e
+\u003c/form\u003e
+\u003c/div\u003e
+
+{# ==== 店舗リスト（横長カード形式） ==== #}
+{% if restaurants %}
+\u003cdiv class=\"restaurant-list\"\u003e
+{% for restaurant in restaurants %}
+\u003cdiv class=\"restaurant-card-horizontal mb-4\"\u003e
+\u003cdiv class=\"restaurant-image\"\u003e
+{% if restaurant.image %}
+\u003cimg src=\"{{ restaurant.image.url }}\" alt=\"{{ restaurant.name }}\"\u003e
+{% else %}
+\u003cdiv class=\"no-image\"\u003e画像なし\u003c/div\u003e
+{% endif %}
+\u003c/div\u003e
+\u003cdiv class=\"restaurant-info\"\u003e
+\u003ch3 class=\"restaurant-name\"\u003e
+\u003ca href=\"{% url 'restaurants:restaurant_detail' restaurant.pk %}\"\u003e{{ restaurant.name }}\u003c/a\u003e
+\u003c/h3\u003e
+\u003cp class=\"restaurant-category\"\u003e
+\u003cspan class=\"badge bg-secondary\"\u003e{{ restaurant.category.name }}\u003c/span\u003e
+{% if restaurant.prefecture %}\u003cspan class=\"ms-2 text-muted\"\u003e📍 {{ restaurant.prefecture }} {% if
+restaurant.city %}{{ restaurant.city }}{% endif %}\u003c/span\u003e{% endif %}
+\u003c/p\u003e
+{% if restaurant.description %}
+\u003cp class=\"restaurant-description\"\u003e{{ restaurant.description|truncatewords:30 }}\u003c/p\u003e
+{% endif %}
+\u003cdiv class=\"restaurant-meta\"\u003e
+{% if restaurant.price_min %}
+\u003cspan class=\"price\"\u003e💰 ¥{{ restaurant.price_min }}〜\u003c/span\u003e
+{% endif %}
+\u003cspan class=\"favorite-count ms-3\"\u003e❤️ {{ restaurant.favorite_count|default:0 }}\u003c/span\u003e
+\u003c/div\u003e
+\u003c/div\u003e
+\u003c/div\u003e
+{% endfor %}
+\u003c/div\u003e
+
+{% elif request.GET %}
+{# 検索したが結果がない場合 #}
+\u003cdiv class=\"text-center py-5\"\u003e
+\u003ch4\u003e😔 検索条件に一致する店舗が見つかりませんでした\u003c/h4\u003e
+\u003cp class=\"text-muted\"\u003e別のキーワードや条件で検索してみてください。\u003c/p\u003e
+\u003ca href=\"{% url 'restaurants:restaurant_list' %}\" class=\"btn btn-primary\"\u003e検索条件をクリア\u003c/a\u003e
+\u003c/div\u003e
+{% else %}
+{# 検索前（初期表示） #}
+\u003cdiv class=\"text-center py-5\"\u003e
+\u003ch3 class=\"text-muted\"\u003e上記のフォームからお店を検索してください\u003c/h3\u003e
+\u003cp class=\"text-muted\"\u003e都道府県、市区町村、カテゴリ、キーワードから検索できます。\u003c/p\u003e
+\u003c/div\u003e
+{% endif %}
+
+\u003cstyle\u003e
+/* 検索フォームのスタイル */
+.search-container {
+max-width: 1200px;
+margin: 0 auto 40px;
+}
+
+.search-form-large {
+background: #f8f9fa;
+padding: 40px;
+border-radius: 12px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.search-field {
+margin-bottom: 20px;
+}
+
+.search-buttons {
+margin-top: 10px;
+}
+
+/* 横長カード形式のスタイル */
+.restaurant-list {
+max-width: 1000px;
+margin: 0 auto;
+}
+
+.restaurant-card-horizontal {
+display: flex;
+border: 1px solid #dee2e6;
+border-radius: 12px;
+overflow: hidden;
+background: white;
+transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.restaurant-card-horizontal:hover {
+box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+transform: translateY(-2px);
+}
+
+.restaurant-image {
+width: 300px;
+height: 200px;
+flex-shrink: 0;
+background: #f8f9fa;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.restaurant-image img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.restaurant-image .no-image {
+color: #6c757d;
+font-size: 14px;
+}
+
+.restaurant-info {
+flex: 1;
+padding: 20px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.restaurant-name {
+font-size: 1.5rem;
+margin: 0;
+font-weight: 600;
+}
+
+.restaurant-name a {
+color: #212529;
+text-decoration: none;
+transition: color 0.2s;
+}
+
+.restaurant-name a:hover {
+color: #0d6efd;
+}
+
+.restaurant-category {
+margin: 0;
+}
+
+.restaurant-description {
+color: #6c757d;
+margin: 0;
+font-size: 0.95rem;
+line-height: 1.6;
+}
+
+.restaurant-meta {
+display: flex;
+align-items: center;
+margin-top: auto;
+font-size: 0.9rem;
+color: #495057;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+.restaurant-card-horizontal {
+flex-direction: column;
+}
+
+.restaurant-image {
+width: 100%;
+height: 180px;
+}
+
+.search-form-large {
+padding: 20px;
+}
+}
+\u003c/style\u003e
+
+\u003cscript\u003e
+// 都道府県選択時に市区町村を動的に更新
+document.addEventListener('DOMContentLoaded', function() {
+const prefectureSelect = document.getElementById('prefectureSelect');
+const citySelect = document.getElementById('citySelect');
+
+if (prefectureSelect) {
+prefectureSelect.addEventListener('change', function() {
+const prefecture = this.value;
+
+// 市区町村選択をリセット
+citySelect.innerHTML = '\u003coption value=\"\"\u003eすべて\u003c/option\u003e';
+
+if (prefecture) {
+// APIから市区町村を取得
+fetch(`/api/cities_by_prefecture/?prefecture=${encodeURIComponent(prefecture)}`)
+.then(response =\u003e response.json())
+.then(data =\u003e {
+if (data.cities \u0026\u0026 data.cities.length \u003e 0) {
+data.cities.forEach(city =\u003e {
+const option = document.createElement('option');
+option.value = city;
+option.textContent = city;
+citySelect.appendChild(option);
+});
+}
+})
+.catch(error =\u003e console.error('Error:', error));
+}
+});
+}
+});
+\u003c/script\u003e
+
+{% endblock %}

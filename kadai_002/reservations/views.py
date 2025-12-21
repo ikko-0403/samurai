@@ -2,6 +2,7 @@ from django.views.generic import ListView, CreateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
+from django.contrib import messages
 from .models import Reservation
 from .forms import ReservationForm
 from restaurants.models import Restaurant
@@ -46,6 +47,7 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         restaurant_pk = self.kwargs.get('restaurant_pk')
         form.instance.restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
+        messages.success(self.request, '予約を作成しました。')
         return super().form_valid(form)
 
 
@@ -74,6 +76,10 @@ class ReservationUpdateView(LoginRequiredMixin, UpdateView):
         kwargs = super().get_form_kwargs()
         kwargs['restaurant'] = self.object.restaurant
         return kwargs
+    
+    def form_valid(self, form):
+        messages.success(self.request, '予約を更新しました。')
+        return super().form_valid(form)
 
 
 class ReservationCancelView(LoginRequiredMixin, View):
@@ -85,4 +91,5 @@ class ReservationCancelView(LoginRequiredMixin, View):
         if reservation.status != 'cancelled':
             reservation.status = 'cancelled'
             reservation.save()
+            messages.success(request, '予約をキャンセルしました。')
         return redirect('reservations:reservation_list')

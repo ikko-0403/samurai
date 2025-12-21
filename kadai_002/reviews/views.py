@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import CreateView, UpdateView, DeleteView
+from django.contrib import messages
 from .forms import ReviewForm
 from .models import Review
 from restaurants.models import Restaurant
@@ -27,6 +28,7 @@ class ReviewCreateView(PaidMemberRequiredMixin, LoginRequiredMixin, CreateView):
         restaurant = get_object_or_404(Restaurant, pk=self.kwargs['restaurant_id'])
         form.instance.user = self.request.user
         form.instance.restaurant = restaurant
+        messages.success(self.request, 'レビューを投稿しました。')
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -44,6 +46,10 @@ class ReviewUpdateView(PaidMemberRequiredMixin, LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('restaurants:restaurant_detail', args=[self.object.restaurant_id])
+    
+    def form_valid(self, form):
+        messages.success(self.request, 'レビューを更新しました。')
+        return super().form_valid(form)
 
 
 class ReviewDeleteView(PaidMemberRequiredMixin, LoginRequiredMixin, DeleteView):
@@ -55,3 +61,7 @@ class ReviewDeleteView(PaidMemberRequiredMixin, LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('restaurants:restaurant_detail', args=[self.object.restaurant_id])
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'レビューを削除しました。')
+        return super().delete(request, *args, **kwargs)

@@ -26,11 +26,9 @@
     {# ★ 平均評価＋ボタン（←ブロック内に移動！） #}
     <p class="mb-2">
       <strong>評価：</strong>
-      {% with avg_int=avg_rating|floatformat:0 %}
       <span class="text-warning">
-        {% for _ in "12345" %}
-        {% if forloop.counter <= avg_int %}★{% else %}☆{% endif %} {% endfor %} </span>
-          {% endwith %}
+        {% for i in "12345" %}
+        {% if forloop.counter <= avg_rating|add:0.5 %}★{% else %}☆{% endif %} {% endfor %} </span>
           <span class="ms-2">({{ avg_rating|floatformat:1 }} / 5, {{ review_count }}件)</span>
     </p>
 

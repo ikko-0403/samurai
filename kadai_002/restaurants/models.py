@@ -68,6 +68,7 @@ class Restaurant(models.Model):
     open_time = models.TimeField()
     close_time = models.TimeField()
     prefecture = models.CharField('都道府県', max_length=10, default='愛知県')
+    city = models.CharField('市区町村', max_length=50, default='名古屋市')
     zipcode = models.CharField(max_length=10)
     address = models.CharField(max_length=200)
     tel = models.CharField(max_length=20)

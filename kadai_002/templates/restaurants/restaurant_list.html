@@ -2,185 +2,163 @@
 {% block title %}店舗一覧 | NAGOYAMESHI{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="mb-0">
-    {% if prefecture %}
-    {{ prefecture }} の店舗一覧
-    {% else %}
-    店舗一覧
+<h1 class="mb-4 text-center">🍽️ NAGOYAMESHI</h1>
+
+<div class="search-container">
+  {% if request.GET %}
+  <form method="get" class="row g-2 mb-4">
+  {% else %}
+  <form method="get" class="search-form-large mb-5">
+    <h3 class="text-center mb-4">お店を検索</h3>
+  {% endif %}
+  
+    <div class="{% if request.GET %}col-md-2{% else %}search-field{% endif %}">
+      <label class="form-label">都道府県</label>
+      <select name="prefecture" class="form-select" id="prefectureSelect">
+        <option value="">すべて</option>
+        {% for pref in prefectures %}
+        <option value="{{ pref }}" {% if pref == prefecture %}selected{% endif %}>{{ pref }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="{% if request.GET %}col-md-2{% else %}search-field{% endif %}">
+      <label class="form-label">市区町村</label>
+      <select name="city" id="citySelect" class="form-select">
+        <option value="">すべて</option>
+      </select>
+    </div>
+
+    <div class="{% if request.GET %}col-md-2{% else %}search-field{% endif %}">
+      <label class="form-label">カテゴリ</label>
+      <select name="category_name" class="form-select">
+        <option value="">すべて</option>
+        {% for category_name in category_names %}
+        <option value="{{ category_name }}" {% if category_name == request.GET.category_name %}selected{% endif %}>{{ category_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="{% if request.GET %}col-md-2{% else %}search-field{% endif %}">
+      <label class="form-label">店舗名</label>
+      <input type="text" name="keyword" class="form-control" placeholder="キーワードで検索" value="{{ keyword }}">
+    </div>
+
+    {% if request.GET %}
+    <div class="col-md-2">
+      <label class="form-label">並び替え</label>
+      <select name="sort" class="form-select">
+        <option value="default" {% if sort == "default" %}selected{% endif %}>新しい順</option>
+        <option value="price_low" {% if sort == "price_low" %}selected{% endif %}>価格が安い順</option>
+        <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>価格が高い順</option>
+      </select>
+    </div>
     {% endif %}
-  </h1>
-  <a href="{% url 'restaurants:prefecture_select' %}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left"></i> 都道府県選択に戻る
-  </a>
+
+    <div class="{% if request.GET %}col-md-2 d-flex align-items-end{% else %}search-buttons{% endif %}">
+      <button type="submit" class="btn btn-primary {% if not request.GET %}btn-lg w-100{% else %}me-2{% endif %}">🔍 検索</button>
+      {% if request.GET %}
+      <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">クリア</a>
+      {% endif %}
+    </div>
+  </form>
 </div>
 
-<!-- ▼ 検索・絞り込み・並び替えフォーム ▼ -->
-<form method="get" class="row g-2 mb-4">
-  <!-- 都道府県を保持 -->
-  {% if prefecture %}
-  <input type="hidden" name="prefecture" value="{{ prefecture }}">
-  {% endif %}
-
-  <!-- 店舗名検索 -->
-  <div class="col-md-3">
-    <label class="form-label">店舗名</label>
-    <input type="text" name="keyword" class="form-control" placeholder="店舗名で検索" value="{{ keyword }}">
-  </div>
-
-  <!-- カテゴリ選択（名前で絞り込み） -->
-  <div class="col-md-3">
-    <label class="form-label">カテゴリ</label>
-    <select name="category_name" class="form-select">
-      <option value="">すべて</option>
-      {% for category_name in category_names %}
-      <option value="{{ category_name }}" {% if category_name==request.GET.category_name %}selected{% endif %}>
-        {{ category_name }}
-      </option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <!-- 並び替え -->
-  <div class="col-md-3">
-    <label class="form-label">並び替え</label>
-    <select name="sort" class="form-select">
-      <option value="default" {% if sort=="default" %}selected{% endif %}>新しい順</option>
-      <option value="price_low" {% if sort=="price_low" %}selected{% endif %}>価格が安い順</option>
-      <option value="price_high" {% if sort=="price_high" %}selected{% endif %}>価格が高い順</option>
-    </select>
-  </div>
-
-  <div class="col-md-3 d-flex align-items-end">
-    <button type="submit" class="btn btn-primary me-2">検索</button>
-    <a href="{% url 'restaurants:prefecture_select' %}" class="btn btn-outline-secondary">
-      クリア
-    </a>
-  </div>
-</form>
-<!-- ▲ フィルタフォームここまで ▲ -->
-{# ==== 店舗カード一覧 ==== #}
-<div class="row g-4">
+{% if restaurants %}
+<div class="restaurant-list">
   {% for restaurant in restaurants %}
-  <div class="col-md-4 col-sm-6">
-    <div class="card h-100 shadow-sm">
+  <div class="restaurant-card-horizontal mb-4">
+    <div class="restaurant-image">
       {% if restaurant.image %}
-      <img src="{{ restaurant.image.url }}" class="card-img-top" alt="{{ restaurant.name }}">
+      <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}">
+      {% else %}
+      <div class="no-image">画像なし</div>
       {% endif %}
-
-      <div class="card-body">
-        <h5 class="card-title">{{ restaurant.name }}</h5>
-        <p class="card-text small text-muted mb-1">
-          {{ restaurant.category.name }} / {{ restaurant.address }}
-        </p>
-        <p class="card-text small mb-2">
-          営業時間: {{ restaurant.open_time }}〜{{ restaurant.close_time }}
-        </p>
-
-        <p class="mb-1 text-muted small" id="favorite-count-{{ restaurant.pk }}">
-          お気に入り <span class="favorite-count">{{ restaurant.favorite_count|default:0 }}</span> 件
-        </p>
-
-        {% if user.is_authenticated %}
-        <button
-          class="btn btn-sm favorite-btn {% if restaurant.is_favorited %}btn-warning{% else %}btn-outline-primary{% endif %} me-2"
-          data-restaurant-id="{{ restaurant.pk }}" data-is-favorited="{{ restaurant.is_favorited|yesno:'true,false' }}"
-          onclick="toggleFavorite(this, {{ restaurant.pk }})">
-          <span class="favorite-icon">{% if restaurant.is_favorited %}★{% else %}☆{% endif %}</span>
-          <span class="favorite-text">{% if restaurant.is_favorited %}解除{% else %}お気に入り{% endif %}</span>
-        </button>
-        {% endif %}
-
-        <a href="{% url 'restaurants:restaurant_detail' restaurant.pk %}" class="btn btn-primary btn-sm">
-          詳細を見る
-        </a>
+    </div>
+    <div class="restaurant-info">
+      <h3 class="restaurant-name">
+        <a href="{% url 'restaurants:restaurant_detail' restaurant.pk %}">{{ restaurant.name }}</a>
+      </h3>
+      <p class="restaurant-category">
+        <span class="badge bg-secondary">{{ restaurant.category.name }}</span>
+        {% if restaurant.prefecture %}<span class="ms-2 text-muted">📍 {{ restaurant.prefecture }} {% if restaurant.city %}{{ restaurant.city }}{% endif %}</span>{% endif %}
+      </p>
+      {% if restaurant.description %}
+      <p class="restaurant-description">{{ restaurant.description|truncatewords:30 }}</p>
+      {% endif %}
+      <div class="restaurant-meta">
+        {% if restaurant.price_min %}<span class="price">💰 ¥{{ restaurant.price_min }}〜</span>{% endif %}
+        <span class="favorite-count ms-3">❤️ {{ restaurant.favorite_count|default:0 }}</span>
       </div>
     </div>
   </div>
-  {% empty %}
-  <p>このカテゴリにはまだ店舗がありません。</p>
   {% endfor %}
 </div>
+{% elif request.GET %}
+<div class="text-center py-5">
+  <h4>😔 検索条件に一致する店舗が見つかりませんでした</h4>
+  <p class="text-muted">別のキーワードや条件で検索してみてください。</p>
+  <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-primary">検索条件をクリア</a>
+</div>
+{% else %}
+<div class="text-center py-5">
+  <h3 class="text-muted">上記のフォームからお店を検索してください</h3>
+  <p class="text-muted">都道府県、市区町村、カテゴリ、キーワードから検索できます。</p>
+</div>
+{% endif %}
+
+<style>
+  .search-container { max-width: 1200px; margin: 0 auto 40px; }
+  .search-form-large { background: #f8f9fa; padding: 40px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .search-field { margin-bottom: 20px; }
+  .search-buttons { margin-top: 10px; }
+  .restaurant-list { max-width: 1000px; margin: 0 auto; }
+  .restaurant-card-horizontal { display: flex; border: 1px solid #dee2e6; border-radius: 12px; overflow: hidden; background: white; transition: box-shadow 0.3s ease, transform 0.2s ease; }
+  .restaurant-card-horizontal:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); transform: translateY(-2px); }
+  .restaurant-image { width: 300px; height: 200px; flex-shrink: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; }
+  .restaurant-image img { width: 100%; height: 100%; object-fit: cover; }
+  .restaurant-image .no-image { color: #6c757d; font-size: 14px; }
+  .restaurant-info { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .restaurant-name { font-size: 1.5rem; margin: 0; font-weight: 600; }
+  .restaurant-name a { color: #212529; text-decoration: none; transition: color 0.2s; }
+  .restaurant-name a:hover { color: #0d6efd; }
+  .restaurant-category { margin: 0; }
+  .restaurant-description { color: #6c757d; margin: 0; font-size: 0.95rem; line-height: 1.6; }
+  .restaurant-meta { display: flex; align-items: center; margin-top: auto; font-size: 0.9rem; color: #495057; }
+  @media (max-width: 768px) {
+    .restaurant-card-horizontal { flex-direction: column; }
+    .restaurant-image { width: 100%; height: 180px; }
+    .search-form-large { padding: 20px; }
+  }
+</style>
 
 <script>
-  function toggleFavorite(button, restaurantId) {
-    // CSRFトークンを取得
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value || getCookie('csrftoken');
-
-    // ボタンを一時的に無効化
-    button.disabled = true;
-
-    // お気に入り切り替えAPIを呼び出し
-    fetch(`/favorite/${restaurantId}/`, {
-      method: 'POST',
-      headers: {
-        'X-CSRFToken': csrftoken,
-        'Content-Type': 'application/json',
-      },
-      credentials: 'same-origin'
-    })
-      .then(response => {
-        if (response.redirected) {
-          // 有料会員でない場合はリダイレクト
-          window.location.href = response.url;
-          return;
+  document.addEventListener('DOMContentLoaded', function() {
+    const prefectureSelect = document.getElementById('prefectureSelect');
+    const citySelect = document.getElementById('citySelect');
+    
+    if (prefectureSelect) {
+      prefectureSelect.addEventListener('change', function() {
+        const prefecture = this.value;
+        citySelect.innerHTML = '<option value="">すべて</option>';
+        
+        if (prefecture) {
+          fetch(`/api/cities/?prefecture=${encodeURIComponent(prefecture)}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.cities && data.cities.length > 0) {
+                data.cities.forEach(city => {
+                  const option = document.createElement('option');
+                  option.value = city;
+                  option.textContent = city;
+                  citySelect.appendChild(option);
+                });
+              }
+            })
+            .catch(error => console.error('Error:', error));
         }
-        return response.json();
-      })
-      .then(data => {
-        if (data && data.success) {
-          // お気に入り状態を切り替え
-          const isFavorited = data.is_favorited;
-          const icon = button.querySelector('.favorite-icon');
-          const text = button.querySelector('.favorite-text');
-          const countElement = document.querySelector(`#favorite-count-${restaurantId} .favorite-count`);
-
-          if (isFavorited) {
-            button.classList.remove('btn-outline-primary');
-            button.classList.add('btn-warning');
-            icon.textContent = '★';
-            text.textContent = '解除';
-          } else {
-            button.classList.remove('btn-warning');
-            button.classList.add('btn-outline-primary');
-            icon.textContent = '☆';
-            text.textContent = 'お気に入り';
-          }
-
-          // お気に入り件数を更新
-          if (countElement && data.favorite_count !== undefined) {
-            countElement.textContent = data.favorite_count;
-          }
-
-          button.dataset.isFavorited = isFavorited;
-        }
-
-        // ボタンを再度有効化
-        button.disabled = false;
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('エラーが発生しました。もう一度お試しください。');
-        button.disabled = false;
       });
-  }
-
-  // CSRFトークンを取得する関数
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
     }
-    return cookieValue;
-  }
+  });
 </script>
-
-{% csrf_token %}
 {% endblock %}
