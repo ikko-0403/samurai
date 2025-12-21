@@ -89,7 +89,7 @@
                             class="btn btn-outline-secondary">
                             キャンセル
                         </a>
-                        <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary">← 一覧に戻る</a>                    </div>
+                    </div>
                 </form>
             </div>
         </div>

@@ -10,19 +10,19 @@
     {# ←★ここで form.rating は出さない！ #}
     {% with current=form.data.rating|default:form.instance.rating|default:3 %}
     <fieldset class="rating" role="radiogroup" aria-label="星による評価">
-      <input type="radio" id="star5" name="rating" value="5" {% if current|stringformat:"s" == "5" %}checked{% endif %}>
+      <input type="radio" id="star5" name="rating" value="5" {% if current|stringformat:"s"=="5" %}checked{% endif %}>
       <label for="star5" aria-label="5 stars"></label>
 
-      <input type="radio" id="star4" name="rating" value="4" {% if current|stringformat:"s" == "4" %}checked{% endif %}>
+      <input type="radio" id="star4" name="rating" value="4" {% if current|stringformat:"s"=="4" %}checked{% endif %}>
       <label for="star4" aria-label="4 stars"></label>
 
-      <input type="radio" id="star3" name="rating" value="3" {% if current|stringformat:"s" == "3" %}checked{% endif %}>
+      <input type="radio" id="star3" name="rating" value="3" {% if current|stringformat:"s"=="3" %}checked{% endif %}>
       <label for="star3" aria-label="3 stars"></label>
 
-      <input type="radio" id="star2" name="rating" value="2" {% if current|stringformat:"s" == "2" %}checked{% endif %}>
+      <input type="radio" id="star2" name="rating" value="2" {% if current|stringformat:"s"=="2" %}checked{% endif %}>
       <label for="star2" aria-label="2 stars"></label>
 
-      <input type="radio" id="star1" name="rating" value="1" {% if current|stringformat:"s" == "1" %}checked{% endif %}>
+      <input type="radio" id="star1" name="rating" value="1" {% if current|stringformat:"s"=="1" %}checked{% endif %}>
       <label for="star1" aria-label="1 star"></label>
     </fieldset>
     {% endwith %}
@@ -42,5 +42,6 @@
   </div>
 
   <button type="submit" class="btn btn-primary btn-sm">保存</button>
+  <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary btn-sm ms-2">← 一覧に戻る</a>
 </form>
 {% endblock %}

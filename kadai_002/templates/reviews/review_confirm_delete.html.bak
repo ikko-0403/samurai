@@ -8,7 +8,6 @@
 <form method="post">
   {% csrf_token %}
   <button type="submit" class="btn btn-danger">削除する</button>
-  <a href="{% url 'restaurants:restaurant_detail' object.restaurant_id %}" class="btn btn-outline-secondary ms-2">店舗詳細に戻る</a>
-  <a href="{% url 'restaurants:restaurant_list' %}" class="btn btn-outline-secondary ms-2">← 一覧に戻る</a>
+  <a href="{% url 'restaurants:restaurant_detail' object.restaurant_id %}" class="btn btn-outline-secondary ms-2">戻る</a>
 </form>
 {% endblock %}
