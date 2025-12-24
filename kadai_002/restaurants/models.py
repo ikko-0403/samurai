@@ -78,8 +78,34 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Table(models.Model):
+    """テーブル（座席）モデル"""
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='tables',
+        verbose_name='店舗'
+    )
+    capacity = models.PositiveIntegerField(
+        verbose_name='定員数',
+        help_text='この席の定員数（2名、4名、8名など）'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='作成日時')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新日時')
+    
+    class Meta:
+        ordering = ['restaurant', 'capacity']
+        verbose_name = 'テーブル'
+        verbose_name_plural = 'テーブル'
+        indexes = [
+            models.Index(fields=['restaurant', 'capacity']),
+        ]
+    
     def __str__(self):
-        return self.name
+        return f"{self.restaurant.name} - {self.capacity}名席 (ID:{self.id})"
+
 
 class Favorite(models.Model):
     user = models.ForeignKey(

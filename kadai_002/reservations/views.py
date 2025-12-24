@@ -47,8 +47,14 @@ class ReservationCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         restaurant_pk = self.kwargs.get('restaurant_pk')
         form.instance.restaurant = get_object_or_404(Restaurant, pk=restaurant_pk)
+        
+        # フォームのバリデーションで割り当てられた席を設定
+        if hasattr(form, 'assigned_table') and form.assigned_table:
+            form.instance.table = form.assigned_table
+        
         messages.success(self.request, '予約を作成しました。')
         return super().form_valid(form)
+
 
 
 class ReservationUpdateView(LoginRequiredMixin, UpdateView):
@@ -78,8 +84,13 @@ class ReservationUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
     
     def form_valid(self, form):
+        # フォームのバリデーションで割り当てられた席を設定
+        if hasattr(form, 'assigned_table') and form.assigned_table:
+            form.instance.table = form.assigned_table
+        
         messages.success(self.request, '予約を更新しました。')
         return super().form_valid(form)
+
 
 
 class ReservationCancelView(LoginRequiredMixin, View):

@@ -1,7 +1,7 @@
 # restaurants/admin.py
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from .models import Company, Category, Restaurant, Favorite
+from .models import Company, Category, Restaurant, Favorite, Table
 
 User = get_user_model()
 
@@ -70,3 +70,12 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_display = ("user", "restaurant", "created_at")
     list_filter = ("restaurant",)
     search_fields = ("user__email", "restaurant__name")
+
+
+@admin.register(Table)
+class TableAdmin(admin.ModelAdmin):
+    list_display = ('id', 'restaurant', 'capacity', 'created_at')
+    list_filter = ('capacity', 'restaurant')
+    search_fields = ('restaurant__name',)
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('restaurant', 'capacity')

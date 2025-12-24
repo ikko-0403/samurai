@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from restaurants.models import Restaurant
+from restaurants.models import Restaurant, Table
 
 
 class Reservation(models.Model):
@@ -24,6 +24,15 @@ class Reservation(models.Model):
         on_delete=models.CASCADE,
         related_name='reservations',
         verbose_name='店舗'
+    )
+    table = models.ForeignKey(
+        Table,
+        on_delete=models.SET_NULL,
+        related_name='reservations',
+        verbose_name='テーブル',
+        null=True,
+        blank=True,
+        help_text='割り当てられた座席'
     )
     
     # 予約日時
